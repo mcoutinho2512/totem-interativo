@@ -1,0 +1,18 @@
+.home { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.weatherWidget { display: flex; align-items: center; gap: 12px; padding: 16px; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.weatherWidget img { width: 50px; height: 50px; }
+.temp { font-size: 28px; font-weight: bold; color: #1a365d; }
+.desc { color: #718096; text-transform: capitalize; }
+.gallery { flex: 1; position: relative; border-radius: 16px; overflow: hidden; min-height: 300px; background: #e2e8f0; }
+.galleryImage { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+.placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #4a5568; }
+.placeholder h1 { font-size: 32px; margin-bottom: 8px; }
+.galleryDots { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
+.dot.active { background: white; }
+.quickActions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.actionBtn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; }
+.actionBtn:active { transform: scale(0.95); }
+.actionIcon { font-size: 32px; }
+.actionLabel { font-size: 14px; font-weight: 600; color: #2d3748; }
+.locationInfo { text-align: center; padding: 12px; color: #718096; font-size: 14px; }

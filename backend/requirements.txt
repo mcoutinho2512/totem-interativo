@@ -1,0 +1,27 @@
+# Django
+Django>=5.0,<6.0
+djangorestframework>=3.14,<4.0
+django-cors-headers>=4.0,<5.0
+django-filter>=23.0,<25.0
+djangorestframework-simplejwt>=5.3,<6.0
+
+# Database
+psycopg2-binary>=2.9,<3.0
+
+# Cache & Tasks
+redis>=5.0,<6.0
+celery>=5.3,<6.0
+django-celery-beat>=2.5,<3.0
+
+# Utils
+python-decouple>=3.8,<4.0
+Pillow>=10.0,<11.0
+requests>=2.31,<3.0
+qrcode>=7.4,<8.0
+
+# API Integrations
+httpx>=0.26,<1.0
+
+# Production
+gunicorn>=21.0,<23.0
+whitenoise>=6.6,<7.0

@@ -1,0 +1,214 @@
+.touchHome {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  color: white;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: rgba(255,255,255,0.05);
+}
+
+.brandSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.cityName {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(90deg, #fff 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tagline {
+  font-size: 14px;
+  opacity: 0.7;
+  margin: 4px 0 0 0;
+}
+
+.infoSection {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.weatherBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.1);
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.weatherBox img {
+  width: 40px;
+  height: 40px;
+}
+
+.temp {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.timeBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.timeBox .time {
+  font-size: 32px;
+  font-weight: 300;
+}
+
+.timeBox .date {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.actionsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 16px;
+  padding: 24px;
+  flex: 1;
+}
+
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.actionCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--card-color);
+}
+
+.actionCard:hover {
+  transform: translateY(-4px);
+  background: rgba(255,255,255,0.12);
+  border-color: var(--card-color);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.actionCard:active {
+  transform: scale(0.98);
+}
+
+.actionIcon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.actionLabel {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.actionDesc {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.adSection {
+  height: 140px;
+  margin: 0 24px 16px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.adImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.adOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 20px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  font-size: 14px;
+}
+
+.adPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(167,139,250,0.2) 0%, rgba(139,92,246,0.2) 100%);
+}
+
+.adPlaceholder span {
+  font-size: 24px;
+}
+
+.adPlaceholder p {
+  font-size: 14px;
+  opacity: 0.6;
+  margin: 8px 0 0 0;
+}
+
+.adIndicators {
+  position: absolute;
+  bottom: 12px;
+  right: 20px;
+  display: flex;
+  gap: 6px;
+}
+
+.indicator {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.3);
+}
+
+.indicator.active {
+  background: white;
+  width: 32px;
+}
+
+.footer {
+  padding: 16px 24px;
+  background: rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+.location {
+  font-size: 14px;
+  opacity: 0.7;
+}

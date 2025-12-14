@@ -1,0 +1,245 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: white;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: rgba(255,255,255,0.05);
+}
+
+.cityInfo h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.date {
+  font-size: 14px;
+  opacity: 0.7;
+  text-transform: capitalize;
+}
+
+.timeDisplay {
+  text-align: right;
+}
+
+.time {
+  font-size: 48px;
+  font-weight: 300;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: auto 1fr;
+  gap: 16px;
+  padding: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.weatherWidget {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.weatherMain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.weatherIcon {
+  width: 80px;
+  height: 80px;
+}
+
+.temperature {
+  font-size: 56px;
+  font-weight: 300;
+}
+
+.weatherDetails span {
+  font-size: 18px;
+  text-transform: capitalize;
+}
+
+.weatherMeta {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.weatherForecast {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: auto;
+}
+
+.mapWidget {
+  grid-row: span 2;
+  background: #2d3748;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+}
+
+.mapOverlay {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(49, 130, 206, 0.95);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.eventsWidget, .newsWidget {
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.eventsWidget h3, .newsWidget h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.eventsList, .newsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.eventItem, .newsItem {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.eventItem:hover, .newsItem:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.eventDate {
+  background: #3182ce;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.eventTitle, .newsTitle {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.noData {
+  font-size: 14px;
+  opacity: 0.6;
+  text-align: center;
+  padding: 20px;
+}
+
+.adBanner {
+  height: 120px;
+  margin: 0 16px;
+  background: #2d3748;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.adImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.adPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+.adDots {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+}
+
+.dot.active {
+  background: white;
+}
+
+.bottomNav {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px;
+  background: rgba(0,0,0,0.3);
+}
+
+.bottomNav button {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bottomNav button:hover, .navActive {
+  background: rgba(255,255,255,0.2) !important;
+}

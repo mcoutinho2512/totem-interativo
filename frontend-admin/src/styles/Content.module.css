@@ -1,0 +1,13 @@
+.content { display: flex; flex-direction: column; gap: 16px; }
+.content h2 { color: #1a365d; font-size: 24px; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.filterBtn { padding: 10px 16px; background: white; border-radius: 20px; font-size: 14px; color: #4a5568; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.filterBtn.active { background: #3182ce; color: white; }
+.list { display: flex; flex-direction: column; gap: 12px; }
+.card { display: flex; gap: 16px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.image { width: 120px; height: 100px; object-fit: cover; }
+.info { flex: 1; padding: 16px; }
+.info h3 { font-size: 16px; color: #1a365d; margin-bottom: 8px; }
+.info p { font-size: 14px; color: #4a5568; margin-bottom: 4px; }
+.meta { color: #718096 !important; font-size: 13px !important; }
+.price { color: #48bb78; font-weight: bold; }

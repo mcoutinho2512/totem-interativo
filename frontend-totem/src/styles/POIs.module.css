@@ -1,0 +1,19 @@
+.container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+.title { font-size: 1.8rem; color: #333; margin-bottom: 20px; }
+.loading { display: flex; justify-content: center; align-items: center; min-height: 50vh; font-size: 1.2rem; color: #666; }
+.noPois { text-align: center; color: #666; padding: 40px; }
+.filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.filterBtn { padding: 10px 20px; border: 2px solid #e0e0e0; background: white; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+.filterBtn:hover { border-color: #1a73e8; color: #1a73e8; }
+.filterBtn.active { background: #1a73e8; color: white; border-color: #1a73e8; }
+.poisList { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; }
+.poiCard { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+.poiInfo { flex: 1; }
+.poiName { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 5px; }
+.poiAddress { color: #666; font-size: 0.9rem; margin-bottom: 5px; }
+.poiPhone a { color: #1a73e8; text-decoration: none; }
+.poiActions { display: flex; gap: 10px; flex-direction: column; }
+.callBtn, .routeBtn { padding: 10px 16px; border-radius: 8px; font-weight: 500; text-align: center; cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+.callBtn { background: #e8f0fe; color: #1a73e8; border: none; }
+.routeBtn { background: #1a73e8; color: white; border: none; }
+.routeBtn:hover { background: #1557b0; }

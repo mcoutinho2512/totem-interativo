@@ -1,0 +1,250 @@
+.weather {
+  min-height: calc(100vh - 140px);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.weatherBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+.weatherBackground.sunny {
+  background: linear-gradient(180deg, #4A90D9 0%, #87CEEB 50%, #B0E0E6 100%);
+}
+
+.weatherBackground.cloudy {
+  background: linear-gradient(180deg, #8E9EAB 0%, #B8C6D9 50%, #CBD5E0 100%);
+}
+
+.weatherBackground.partlyCloudy {
+  background: linear-gradient(180deg, #5B9BD5 0%, #87CEEB 40%, #E0E8F0 100%);
+}
+
+.weatherBackground.rainy {
+  background: linear-gradient(180deg, #4A5568 0%, #718096 50%, #A0AEC0 100%);
+}
+
+.weatherBackground.night {
+  background: linear-gradient(180deg, #1A202C 0%, #2D3748 50%, #4A5568 100%);
+}
+
+.weatherBackground.stormy {
+  background: linear-gradient(180deg, #2D3748 0%, #4A5568 50%, #718096 100%);
+}
+
+.weatherBackground::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  padding: 40px 20px;
+}
+
+.current {
+  text-align: center;
+  color: white;
+  padding: 60px 20px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.location {
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+}
+
+.temp {
+  font-size: 8rem;
+  font-weight: 200;
+  line-height: 1;
+  margin: 20px 0;
+}
+
+.temp::after {
+  content: '';
+  font-size: 4rem;
+  vertical-align: top;
+}
+
+.desc {
+  font-size: 1.5rem;
+  font-weight: 400;
+  text-transform: capitalize;
+  margin-bottom: 15px;
+}
+
+.highLow {
+  font-size: 1.2rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.details {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+  font-size: 1.1rem;
+}
+
+.details span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  border-radius: 20px;
+}
+
+.icon {
+  width: 120px;
+  height: 120px;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.2));
+}
+
+.forecast {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 25px;
+  margin: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.forecast h3 {
+  font-size: 1rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.forecastGrid {
+  display: flex;
+  justify-content: space-around;
+  gap: 15px;
+}
+
+.forecastItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  flex: 1;
+}
+
+.forecastItem .time {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.forecastItem .dayName {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.forecastItem img {
+  width: 40px;
+  height: 40px;
+}
+
+.forecastTemp {
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.forecastTemp .high {
+  color: #333;
+}
+
+.forecastTemp .low {
+  color: #999;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 140px);
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.additionalInfo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin: 20px;
+}
+
+.infoCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.infoCard h4 {
+  font-size: 0.85rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.infoCard .value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.infoCard .unit {
+  font-size: 1rem;
+  color: #666;
+  margin-left: 5px;
+}
+
+@media (max-width: 768px) {
+  .temp {
+    font-size: 5rem;
+  }
+  
+  .details {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .forecastGrid {
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .additionalInfo {
+    grid-template-columns: 1fr;
+  }
+}
