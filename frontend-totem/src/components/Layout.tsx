@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTotemStore } from '../store/totemStore';
 import styles from '../styles/Layout.module.css';
 
@@ -10,22 +11,29 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { totem, language, setLanguage } = useTotemStore();
+  const { t, i18n } = useTranslation();
+  const { totem, setLanguage } = useTotemStore();
 
   const menuItems = [
-    { path: '/', icon: '🏠', label: 'Início' },
-    { path: '/navigation', icon: '🗺️', label: 'Navegação' },
-    { path: '/weather', icon: '🌤️', label: 'Clima' },
-    { path: '/events', icon: '📅', label: 'Eventos' },
-    { path: '/news', icon: '📰', label: 'Notícias' },
-    { path: '/pois', icon: '📍', label: 'Serviços' },
+    { path: '/', icon: '🏠', labelKey: 'nav.home' },
+    { path: '/navigation', icon: '🗺️', labelKey: 'nav.navigation' },
+    { path: '/weather', icon: '🌤️', labelKey: 'nav.weather' },
+    { path: '/events', icon: '📅', labelKey: 'nav.events' },
+    { path: '/news', icon: '📰', labelKey: 'nav.news' },
+    { path: '/pois', icon: '📍', labelKey: 'nav.services' },
   ];
 
   const languages = [
-    { code: 'pt-BR', label: 'PT' },
-    { code: 'en-US', label: 'EN' },
-    { code: 'es-ES', label: 'ES' },
+    { code: 'pt', label: 'PT' },
+    { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' },
   ];
+
+  const handleLanguageChange = (langCode: string) => {
+    i18n.changeLanguage(langCode);
+    setLanguage(langCode);
+    localStorage.setItem('language', langCode);
+  };
 
   return (
     <div className={styles.container}>
@@ -42,8 +50,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {languages.map((lang) => (
             <button
               key={lang.code}
-              className={`${styles.langBtn} ${language === lang.code ? styles.active : ''}`}
-              onClick={() => setLanguage(lang.code)}
+              className={`${styles.langBtn} ${i18n.language === lang.code ? styles.active : ''}`}
+              onClick={() => handleLanguageChange(lang.code)}
             >
               {lang.label}
             </button>
@@ -65,7 +73,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             onClick={() => navigate(item.path)}
           >
             <span className={styles.navIcon}>{item.icon}</span>
-            <span className={styles.navLabel}>{item.label}</span>
+            <span className={styles.navLabel}>{t(item.labelKey)}</span>
           </button>
         ))}
       </nav>

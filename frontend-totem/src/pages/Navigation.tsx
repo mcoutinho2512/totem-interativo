@@ -1,240 +1,136 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { useSearchParams } from 'react-router-dom';
 import { useTotemStore } from '../store/totemStore';
 import { navigationService } from '../services/api';
 import styles from '../styles/Navigation.module.css';
 import 'leaflet/dist/leaflet.css';
 
-// Fix Leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-interface SearchResult {
-  name: string;
-  latitude: number;
-  longitude: number;
-}
-
-interface RouteInfo {
-  distance: number;
-  duration: number;
-  geometry: [number, number][];
-}
-
-const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
+const FitBounds: React.FC<{ bounds: L.LatLngBoundsExpression | null }> = ({ bounds }) => {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, 15);
-  }, [center, map]);
+    if (bounds) map.fitBounds(bounds, { padding: [50, 50] });
+  }, [bounds, map]);
   return null;
 };
 
 const Navigation: React.FC = () => {
+  const { t } = useTranslation();
   const { totem } = useTotemStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [selectedDestination, setSelectedDestination] = useState<SearchResult | null>(null);
-  const [route, setRoute] = useState<RouteInfo | null>(null);
-  const [transportMode, setTransportMode] = useState('foot-walking');
-  const [isLoading, setIsLoading] = useState(false);
-  const [qrCode, setQRCode] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState('');
+  const [route, setRoute] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-  const position: [number, number] = totem 
-    ? [Number(totem.latitude), Number(totem.longitude)]
-    : [-22.8833, -43.1033];
+  const defaultCenter: [number, number] = [-22.8972, -43.1072];
+  
+  const getTotemLocation = (): [number, number] => {
+    if (totem?.latitude && totem?.longitude) {
+      return [Number(totem.latitude), Number(totem.longitude)];
+    }
+    return defaultCenter;
+  };
+  
+  const totemLocation = getTotemLocation();
+
+  useEffect(() => {
+    const lat = searchParams.get('lat');
+    const lng = searchParams.get('lng');
+    const name = searchParams.get('name');
+    
+    if (lat && lng) {
+      setSearch(name || lat + ', ' + lng);
+      handleRoute(parseFloat(lat), parseFloat(lng));
+    }
+  }, [searchParams]);
+
+  const handleRoute = async (destLat: number, destLng: number) => {
+    setLoading(true);
+    try {
+      const res = await navigationService.getRoute(totemLocation, [destLat, destLng]);
+      setRoute(res.data);
+    } catch (err) {
+      console.error('Route error:', err);
+    }
+    setLoading(false);
+  };
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    
-    setIsLoading(true);
+    if (!search.trim()) return;
+    setLoading(true);
     try {
-      const response = await navigationService.geocode(searchQuery);
-      setSearchResults(response.data.results || []);
-    } catch (error) {
-      console.error('Geocode error:', error);
-      setSearchResults([]);
-    }
-    setIsLoading(false);
-  };
-
-  const handleSelectDestination = async (result: SearchResult) => {
-    setSelectedDestination(result);
-    setSearchResults([]);
-    setSearchQuery(result.name);
-    await calculateRoute(result);
-  };
-
-  const calculateRoute = async (destination: SearchResult) => {
-    setIsLoading(true);
-    try {
-      const response = await navigationService.getRoute(
-        position,
-        [destination.latitude, destination.longitude],
-        transportMode
-      );
-      setRoute(response.data);
-    } catch (error) {
-      console.error('Route error:', error);
-    }
-    setIsLoading(false);
-  };
-
-  const handleModeChange = async (mode: string) => {
-    setTransportMode(mode);
-    if (selectedDestination) {
-      setIsLoading(true);
-      try {
-        const response = await navigationService.getRoute(
-          position,
-          [selectedDestination.latitude, selectedDestination.longitude],
-          mode
-        );
-        setRoute(response.data);
-      } catch (error) {
-        console.error('Route error:', error);
+      const res = await navigationService.geocode(search);
+      if (res.data.results?.length > 0) {
+        const { lat, lng } = res.data.results[0];
+        await handleRoute(lat, lng);
       }
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Geocode error:', err);
     }
+    setLoading(false);
   };
 
-  const handleGetQRCode = async () => {
-    if (!selectedDestination) return;
-    
-    try {
-      const response = await navigationService.getQRCode(
-        position,
-        [selectedDestination.latitude, selectedDestination.longitude]
-      );
-      setQRCode(response.data.qr_code);
-    } catch (error) {
-      console.error('QR Code error:', error);
-    }
-  };
-
-  const clearRoute = () => {
-    setSelectedDestination(null);
-    setRoute(null);
-    setSearchQuery('');
-    setQRCode(null);
-  };
-
-  const formatDistance = (meters: number) => {
-    if (meters < 1000) return `${Math.round(meters)} m`;
-    return `${(meters / 1000).toFixed(1)} km`;
-  };
-
-  const formatDuration = (seconds: number) => {
-    if (seconds < 60) return `${Math.round(seconds)} seg`;
-    if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
-    const hours = Math.floor(seconds / 3600);
-    const mins = Math.round((seconds % 3600) / 60);
-    return `${hours}h ${mins}min`;
-  };
-
-  const transportModes = [
-    { id: 'foot-walking', icon: '🚶', label: 'A pé' },
-    { id: 'cycling-regular', icon: '🚴', label: 'Bicicleta' },
-    { id: 'driving-car', icon: '🚗', label: 'Carro' },
-  ];
+  const routeCoords = route?.geometry?.coordinates?.map((c: number[]) => [c[1], c[0]]) || [];
+  const bounds = routeCoords.length > 0 ? L.latLngBounds(routeCoords) : null;
 
   return (
-    <div className={styles.navigation}>
-      <div className={styles.searchContainer}>
+    <div className={styles.container}>
+      <div className={styles.searchBar}>
         <input
           type="text"
-          className={styles.searchInput}
-          placeholder="Para onde você quer ir?"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t('navigation.searchPlaceholder')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          className={styles.searchInput}
         />
-        <button className={styles.searchBtn} onClick={handleSearch}>
+        <button onClick={handleSearch} className={styles.searchBtn} disabled={loading}>
           🔍
         </button>
       </div>
 
-      {searchResults.length > 0 && (
-        <div className={styles.results}>
-          {searchResults.map((result, idx) => (
-            <button
-              key={idx}
-              className={styles.resultItem}
-              onClick={() => handleSelectDestination(result)}
-            >
-              <span className={styles.resultIcon}>📍</span>
-              <span className={styles.resultText}>{result.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className={styles.mapContainer}>
-        <MapContainer center={position} zoom={15} className={styles.map}>
+      <div className={styles.mapWrapper}>
+        <MapContainer center={totemLocation} zoom={14} className={styles.map}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; OpenStreetMap'
           />
-          <MapUpdater center={position} />
-          <Marker position={position}>
-            <Popup>📍 Você está aqui</Popup>
+          <Marker position={totemLocation}>
+            <Popup>{t('navigation.myLocation')}</Popup>
           </Marker>
-          {selectedDestination && (
-            <Marker position={[selectedDestination.latitude, selectedDestination.longitude]}>
-              <Popup>🎯 {selectedDestination.name}</Popup>
+          {route?.destination && (
+            <Marker position={[route.destination.lat, route.destination.lng]}>
+              <Popup>{t('navigation.destination')}</Popup>
             </Marker>
           )}
-          {route && route.geometry && (
-            <Polyline positions={route.geometry} color="#3182ce" weight={5} />
+          {routeCoords.length > 0 && (
+            <>
+              <Polyline positions={routeCoords} color="#1a73e8" weight={5} />
+              <FitBounds bounds={bounds} />
+            </>
           )}
         </MapContainer>
-        {isLoading && <div className={styles.loading}>Calculando...</div>}
       </div>
 
-      {selectedDestination && route && (
-        <div className={styles.routePanel}>
-          <div className={styles.destination}>
-            <h3>🎯 {selectedDestination.name}</h3>
-            <button className={styles.clearBtn} onClick={clearRoute}>✕</button>
+      {route && (
+        <div className={styles.routeInfo}>
+          <div className={styles.routeDetail}>
+            <span className={styles.label}>{t('navigation.distance')}:</span>
+            <span className={styles.value}>{(route.distance / 1000).toFixed(1)} km</span>
           </div>
-
-          <div className={styles.modes}>
-            {transportModes.map((mode) => (
-              <button
-                key={mode.id}
-                className={`${styles.modeBtn} ${transportMode === mode.id ? styles.active : ''}`}
-                onClick={() => handleModeChange(mode.id)}
-              >
-                {mode.icon} {mode.label}
-              </button>
-            ))}
+          <div className={styles.routeDetail}>
+            <span className={styles.label}>{t('navigation.duration')}:</span>
+            <span className={styles.value}>{Math.round(route.duration / 60)} min</span>
           </div>
-
-          <div className={styles.routeSummary}>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryIcon}>📏</span>
-              <span className={styles.summaryValue}>{formatDistance(route.distance)}</span>
-            </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryIcon}>⏱️</span>
-              <span className={styles.summaryValue}>{formatDuration(route.duration)}</span>
-            </div>
-          </div>
-
-          <button className={styles.qrBtn} onClick={handleGetQRCode}>
-            📱 Enviar para celular
-          </button>
-
-          {qrCode && (
-            <div className={styles.qrCode}>
-              <img src={qrCode} alt="QR Code" />
-              <p>Escaneie para abrir no Google Maps</p>
-            </div>
-          )}
         </div>
       )}
     </div>

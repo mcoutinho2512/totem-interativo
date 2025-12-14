@@ -16,19 +16,18 @@ import Layout from './components/Layout';
 const HomeSelector: React.FC = () => {
   const [searchParams] = useSearchParams();
   const theme = searchParams.get('theme');
-  
+
   if (theme === 'dashboard') return <HomeDashboard />;
   if (theme === 'touch') return <HomeTouch />;
   if (theme === 'tomi') return <HomeTomi />;
   if (theme === 'simple') return <Home />;
   if (theme === 'player') return <Player />;
-  
-  // Default: Player (Digital Signage mode)
+
   return <Player />;
 };
 
 function App() {
-  const { initialize, resetSession } = useTotemStore();
+  const { initialize } = useTotemStore();
 
   useEffect(() => {
     initialize();

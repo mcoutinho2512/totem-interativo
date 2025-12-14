@@ -1,0 +1,53 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #1a365d 0%, #2d5a87 100%);
+  color: white;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: white;
+}
+
+.logoIcon {
+  font-size: 1.8rem;
+}
+
+.logoText {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.languages {
+  display: flex;
+  gap: 8px;
+}
+
+.langBtn {
+  padding: 8px 16px;
+  border: 2px solid rgba(255,255,255,0.5);
+  background: transparent;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.langBtn:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: white;
+}
+
+.langBtn.active {
+  background: white;
+  color: #1a365d;
+  border-color: white;
+}
