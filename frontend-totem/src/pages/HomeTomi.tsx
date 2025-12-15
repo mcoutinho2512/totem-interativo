@@ -30,6 +30,16 @@ const HomeTomi: React.FC = () => {
     { code: 'en', label: 'EN', flag: 'US' },
     { code: 'es', label: 'ES', flag: 'ES' },
   ];
+  // Imagens de Niterói como padrão
+  const niteroiGallery = [
+    { image: '/images/niteroi/slide1.jpg', title: 'Niterói' },
+    { image: '/images/niteroi/slide2.jpg', title: 'Niterói' },
+    { image: '/images/niteroi/slide3.jpg', title: 'Niterói' },
+    { image: '/images/niteroi/slide4.jpg', title: 'Niterói' },
+    { image: '/images/niteroi/slide5.jpg', title: 'Niterói' },
+    { image: '/images/niteroi/slide6.jpg', title: 'Niterói' },
+  ];
+
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -46,7 +56,7 @@ const HomeTomi: React.FC = () => {
     weatherService.getCurrent(cityId).then(res => setWeather(res.data)).catch(() => {});
     contentService.getEvents(5).then(res => setEvents(res.data.results || res.data || [])).catch(() => {});
     contentService.getNews(5).then(res => setNews(res.data.results || res.data || [])).catch(() => {});
-    contentService.getGallery().then(res => setGallery(res.data || [])).catch(() => {});
+    contentService.getGallery().then(res => setGallery(res.data?.length > 0 ? res.data : niteroiGallery)).catch(() => setGallery(niteroiGallery));
   }, [totem]);
 
   useEffect(() => {

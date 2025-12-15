@@ -1,232 +1,467 @@
-# 🏙️ Sanaris City Totem
+# 🏛️ Sanaris City Totem
 
-Sistema de Totens Interativos para Cidades Inteligentes
+Sistema de Totem Interativo Digital para cidades inteligentes. Uma solução completa para informações turísticas, navegação, eventos e serviços públicos.
 
-## 📋 Requisitos
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 
-- Docker e Docker Compose
+## 📋 Índice
+
+- [Visão Geral](#-visão-geral)
+- [Funcionalidades](#-funcionalidades)
+- [Arquitetura](#-arquitetura)
+- [Tecnologias](#-tecnologias)
+- [Instalação](#-instalação)
+- [Configuração](#-configuração)
+- [Uso](#-uso)
+- [API Reference](#-api-reference)
+- [Temas Disponíveis](#-temas-disponíveis)
+- [Internacionalização](#-internacionalização)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Contribuição](#-contribuição)
+
+## 🎯 Visão Geral
+
+O **Sanaris City Totem** é uma plataforma de digital signage e quiosque interativo projetada para fornecer informações úteis aos cidadãos e turistas em espaços públicos. O sistema oferece:
+
+- **Navegação GPS** com rotas a pé, carro e bicicleta
+- **Previsão do Tempo** em tempo real
+- **Eventos da Cidade** com localização e direções
+- **Pontos de Interesse (POIs)** como hospitais, restaurantes, hotéis
+- **Notícias Locais** atualizadas
+- **Digital Signage** para exibição de conteúdo publicitário
+
+## ✨ Funcionalidades
+
+### 🗺️ Navegação
+- Busca de endereços com geocoding
+- Cálculo de rotas (a pé, carro, bicicleta)
+- Exibição de rota no mapa interativo
+- QR Code para continuar navegação no celular
+- Integração com OpenRouteService
+
+### 🌤️ Clima
+- Temperatura atual e sensação térmica
+- Previsão para os próximos dias
+- Umidade, vento e condições climáticas
+- Ícones dinâmicos por condição
+
+### 📅 Eventos
+- Lista de eventos da cidade
+- Filtro por categoria e data
+- Botão "Rota até lá" integrado com navegação
+- Informações de preço e local
+
+### 📍 Pontos de Interesse
+- Categorias: hospitais, restaurantes, hotéis, transporte, atrações
+- Filtros por tipo
+- Telefone para contato
+- Botão de navegação até o local
+
+### �� Notícias
+- Feed de notícias locais
+- Imagens e resumos
+- Atualização via RSS ou API
+
+### 🎬 Digital Signage (Player)
+- Rotação automática de conteúdo
+- Suporte a imagens e vídeos
+- Playlists configuráveis
+- Modo fullscreen
+
+## 🏗️ Arquitetura
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      FRONTEND TOTEM                         │
+│                   (React + TypeScript)                      │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐          │
+│  │  TOMI   │ │  Touch  │ │Dashboard│ │ Player  │          │
+│  │  Theme  │ │  Theme  │ │  Theme  │ │  Theme  │          │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘          │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ REST API
+┌─────────────────────────▼───────────────────────────────────┐
+│                      BACKEND API                            │
+│                 (Django REST Framework)                     │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐          │
+│  │ Totems  │ │ Content │ │Navigation│ │ Weather │          │
+│  │   App   │ │   App   │ │   App   │ │   App   │          │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘          │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                      DATA LAYER                             │
+│  ┌─────────────────┐  ┌─────────────────┐                  │
+│  │   PostgreSQL    │  │      Redis      │                  │
+│  │   (PostGIS)     │  │    (Cache)      │                  │
+│  └─────────────────┘  └─────────────────┘                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 🛠️ Tecnologias
+
+### Backend
+- **Python 3.11**
+- **Django 4.x** - Framework web
+- **Django REST Framework** - API REST
+- **PostgreSQL** - Banco de dados
+- **PostGIS** - Extensão geoespacial
+- **Redis** - Cache e filas
+- **Celery** - Tarefas assíncronas
+- **Gunicorn** - Servidor WSGI
+
+### Frontend
+- **React 18** - UI Library
+- **TypeScript** - Type safety
+- **React Router v6** - Navegação SPA
+- **React Leaflet** - Mapas interativos
+- **i18next** - Internacionalização
+- **Axios** - Cliente HTTP
+- **Zustand** - State management
+
+### Infraestrutura
+- **Docker & Docker Compose** - Containerização
+- **Nginx** - Proxy reverso (produção)
+
+### APIs Externas
+- **OpenRouteService** - Rotas e geocoding
+- **OpenStreetMap** - Tiles do mapa
+- **OpenWeatherMap** - Dados meteorológicos (opcional)
+
+## 🚀 Instalação
+
+### Pré-requisitos
+
+- Docker 20.x+
+- Docker Compose 2.x+
 - Git
-- Contas nas APIs (gratuitas):
-  - [OpenWeather](https://openweathermap.org/api) - Clima
-  - [OpenRouteService](https://openrouteservice.org/) - Rotas
 
-## 🚀 Instalação Rápida (Docker)
-
-### 1. Clone ou copie o projeto para seu servidor
-
+### Clone o repositório
 ```bash
-# No servidor 10.50.30.168
-cd /opt
-# Copie a pasta sanaris-city-totem para cá
+git clone https://github.com/mcoutinho2512/totem-interativo.git
+cd totem-interativo
 ```
 
-### 2. Configure as variáveis de ambiente
-
+### Configuração do ambiente
 ```bash
-cd sanaris-city-totem/backend
-cp .env.example .env
-nano .env
+# Copie o arquivo de exemplo
+cp backend/.env.example backend/.env
+
+# Edite as variáveis de ambiente
+nano backend/.env
 ```
 
-Edite o arquivo `.env`:
+### Inicie os containers
+```bash
+docker compose up -d --build
+```
+
+### Verifique se está rodando
+```bash
+docker compose ps
+docker compose logs -f
+```
+
+## ⚙️ Configuração
+
+### Variáveis de Ambiente (backend/.env)
 ```env
-SECRET_KEY=sua-chave-secreta-muito-segura
+# Django
 DEBUG=True
+SECRET_KEY=your-secret-key-here
 ALLOWED_HOSTS=localhost,127.0.0.1,10.50.30.168
 
-DB_NAME=sanaris_totem
-DB_USER=postgres
-DB_PASSWORD=sua-senha-segura
+# Database
+DB_NAME=sanaris_db
+DB_USER=sanaris
+DB_PASSWORD=sanaris_password
 DB_HOST=db
 DB_PORT=5432
 
+# Redis
 REDIS_URL=redis://redis:6379/0
 
-# IMPORTANTE: Adicione suas chaves de API
-OPENWEATHER_API_KEY=sua-api-key-do-openweather
-OPENROUTESERVICE_API_KEY=sua-api-key-do-openrouteservice
+# APIs Externas
+OPENROUTESERVICE_API_KEY=your-api-key-here
+OPENWEATHERMAP_API_KEY=your-api-key-here
 
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://10.50.30.168:3000
+# Configurações do Totem
+DEFAULT_CITY_LAT=-22.8972
+DEFAULT_CITY_LNG=-43.1072
+DEFAULT_CITY_NAME=Niterói
+SESSION_TIMEOUT=60
 ```
 
-### 3. Inicie os containers
+### Obter API Keys
 
+#### OpenRouteService (Obrigatório para navegação)
+1. Acesse https://openrouteservice.org/dev/#/signup
+2. Crie uma conta gratuita
+3. Gere um token em "Tokens"
+4. Adicione no `.env` como `OPENROUTESERVICE_API_KEY`
+
+#### OpenWeatherMap (Opcional)
+1. Acesse https://openweathermap.org/api
+2. Crie uma conta gratuita
+3. Gere uma API key
+4. Adicione no `.env` como `OPENWEATHERMAP_API_KEY`
+
+## 📖 Uso
+
+### Acessar o Frontend
+
+| URL | Descrição |
+|-----|-----------|
+| http://localhost:3000 | Player (Digital Signage) |
+| http://localhost:3000/?theme=tomi | Tema TOMI |
+| http://localhost:3000/?theme=touch | Tema Touch |
+| http://localhost:3000/?theme=dashboard | Tema Dashboard |
+
+### Acessar o Backend
+
+| URL | Descrição |
+|-----|-----------|
+| http://localhost:8000/admin | Django Admin |
+| http://localhost:8000/api/v1/ | API REST |
+
+### Criar superusuário
 ```bash
-cd /opt/sanaris-city-totem
-docker-compose up -d
+docker compose exec backend python manage.py createsuperuser
 ```
 
-### 4. Crie o superusuário
-
+### Popular dados de demonstração
 ```bash
-docker-compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py populate_demo
 ```
 
-### 5. Acesse o sistema
+## 📚 API Reference
 
-- **Totem**: http://10.50.30.168:3000
-- **Admin Django**: http://10.50.30.168:8000/admin
-- **API**: http://10.50.30.168:8000/api/v1/
+### Totems
+```
+GET    /api/v1/totems/              # Lista todos os totems
+POST   /api/v1/totems/              # Cria novo totem
+GET    /api/v1/totems/{id}/         # Detalhes do totem
+PUT    /api/v1/totems/{id}/         # Atualiza totem
+DELETE /api/v1/totems/{id}/         # Remove totem
+POST   /api/v1/totems/identify/     # Identifica totem por IP
+```
 
----
+### Navegação
+```
+GET    /api/v1/navigation/geocode/?q={query}  # Busca endereços
+POST   /api/v1/navigation/route/              # Calcula rota
+POST   /api/v1/navigation/routes/             # Rotas multi-modal
+POST   /api/v1/navigation/qrcode/             # Gera QR Code
+```
 
-## 🔧 Instalação Manual (Desenvolvimento)
+### Conteúdo
+```
+GET    /api/v1/content/events/      # Lista eventos
+GET    /api/v1/content/news/        # Lista notícias
+GET    /api/v1/content/pois/        # Lista POIs
+GET    /api/v1/content/ads/         # Lista publicidade
+```
 
-### Backend
+### Clima
+```
+GET    /api/v1/weather/current/     # Clima atual
+GET    /api/v1/weather/forecast/    # Previsão
+```
 
+## 🎨 Temas Disponíveis
+
+### 1. Player (Digital Signage)
+- Modo fullscreen para exibição de conteúdo
+- Rotação automática de mídia
+- Ideal para totens sem interação
+
+### 2. TOMI
+- Interface inspirada nos totens TOMI
+- Menu circular com ícones grandes
+- Seletor de idioma integrado
+- Ideal para turismo
+
+### 3. Touch
+- Interface otimizada para toque
+- Cards grandes e espaçados
+- Navegação simplificada
+- Ideal para quiosques
+
+### 4. Dashboard
+- Visão geral com widgets
+- Clima, eventos e notícias na mesma tela
+- Ideal para displays informativos
+
+## 🌍 Internacionalização
+
+O sistema suporta múltiplos idiomas:
+
+| Código | Idioma |
+|--------|--------|
+| pt | Português (Brasil) |
+| en | English |
+| es | Español |
+
+### Adicionar novo idioma
+
+1. Crie o arquivo de tradução:
 ```bash
-cd backend
-
-# Criar ambiente virtual
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou: venv\Scripts\activate  # Windows
-
-# Instalar dependências
-pip install -r requirements.txt
-
-# Configurar banco PostgreSQL com PostGIS
-# Criar banco: sanaris_totem
-
-# Copiar e editar .env
-cp .env.example .env
-
-# Rodar migrações
-python manage.py migrate
-
-# Criar superusuário
-python manage.py createsuperuser
-
-# Iniciar servidor
-python manage.py runserver 0.0.0.0:8000
+cp frontend-totem/src/i18n/locales/pt.json frontend-totem/src/i18n/locales/fr.json
 ```
 
-### Frontend Totem
+2. Traduza as chaves no novo arquivo
 
-```bash
-cd frontend-totem
+3. Registre no `i18n/index.ts`:
+```typescript
+import fr from './locales/fr.json';
 
-# Instalar dependências
-npm install
-
-# Configurar .env
-cp .env.example .env
-# Editar REACT_APP_API_URL
-
-# Iniciar
-npm start
+resources: {
+  // ...
+  fr: { translation: fr },
+}
 ```
 
----
+4. Adicione o botão no Header
 
 ## 📁 Estrutura do Projeto
-
 ```
 sanaris-city-totem/
-├── backend/                 # Django REST API
+├── backend/
 │   ├── apps/
-│   │   ├── tenants/        # Multi-tenant (cidades)
-│   │   ├── totems/         # Gestão de totens
-│   │   ├── content/        # Notícias, eventos, POIs
-│   │   ├── navigation/     # Rotas e geocoding
-│   │   ├── weather/        # Integração clima
-│   │   ├── analytics/      # Estatísticas
-│   │   └── advertising/    # Publicidade
-│   ├── config/             # Settings Django
+│   │   ├── advertising/     # Publicidade
+│   │   ├── analytics/       # Analytics e métricas
+│   │   ├── content/         # Eventos, notícias, POIs
+│   │   ├── core/            # Utilitários
+│   │   ├── navigation/      # Rotas e geocoding
+│   │   ├── tenants/         # Multi-tenancy (cidades)
+│   │   ├── totems/          # Gestão de totems
+│   │   └── weather/         # Clima
+│   ├── config/
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── Dockerfile
+│   ├── manage.py
 │   └── requirements.txt
-├── frontend-totem/          # React - Interface do Totem
-├── frontend-admin/          # React - Painel Admin
+│
+├── frontend-totem/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── BottomNav.tsx
+│   │   │   ├── Header.tsx
+│   │   │   └── Layout.tsx
+│   │   ├── i18n/
+│   │   │   ├── locales/
+│   │   │   │   ├── pt.json
+│   │   │   │   ├── en.json
+│   │   │   │   └── es.json
+│   │   │   └── index.ts
+│   │   ├── pages/
+│   │   │   ├── Events.tsx
+│   │   │   ├── Home.tsx
+│   │   │   ├── HomeTomi.tsx
+│   │   │   ├── Navigation.tsx
+│   │   │   ├── News.tsx
+│   │   │   ├── Player.tsx
+│   │   │   ├── POIs.tsx
+│   │   │   └── Weather.tsx
+│   │   ├── services/
+│   │   │   └── api.ts
+│   │   ├── store/
+│   │   │   └── totemStore.ts
+│   │   ├── styles/
+│   │   ├── App.tsx
+│   │   └── index.tsx
+│   ├── Dockerfile
+│   └── package.json
+│
+├── frontend-admin/          # Painel administrativo
 ├── docker-compose.yml
+├── .gitignore
 └── README.md
 ```
 
----
+## 🧪 Testes
+```bash
+# Backend
+docker compose exec backend python manage.py test
 
-## 🎯 Primeiros Passos Após Instalação
-
-### 1. Acessar Django Admin
-- URL: http://10.50.30.168:8000/admin
-- Fazer login com superusuário
-
-### 2. Cadastrar uma Cidade
-- Menu: Tenants > Cidades > Adicionar
-- Preencher: nome, slug, estado, latitude, longitude
-- Exemplo para Rio:
-  - Nome: Rio de Janeiro
-  - Slug: rio-de-janeiro
-  - Estado: RJ
-  - Latitude: -22.9068
-  - Longitude: -43.1729
-
-### 3. Cadastrar um Totem
-- Menu: Totems > Totems > Adicionar
-- Vincular à cidade criada
-- Identificador único (ex: TOTEM-001)
-
-### 4. Configurar o Frontend
-- Editar `frontend-totem/.env`
-- Definir `REACT_APP_TOTEM_IDENTIFIER=TOTEM-001`
-
-### 5. Adicionar Conteúdo
-- Cadastrar imagens na galeria
-- Cadastrar notícias
-- Cadastrar eventos
-- Cadastrar pontos de interesse
-
----
-
-## 🔑 APIs Utilizadas
-
-| API | Uso | Plano Free |
-|-----|-----|------------|
-| OpenWeather | Clima | 1.000 req/dia |
-| OpenRouteService | Rotas | 2.000 req/dia |
-| OpenStreetMap | Mapas | Ilimitado |
-| Nominatim | Geocoding | 1 req/s |
-
----
-
-## 📊 Endpoints da API
-
-```
-GET  /api/v1/core/health/           # Health check
-GET  /api/v1/tenants/cities/        # Listar cidades
-POST /api/v1/totems/identify/       # Identificar totem
-GET  /api/v1/weather/current/       # Clima atual
-GET  /api/v1/weather/forecast/      # Previsão
-POST /api/v1/navigation/route/      # Calcular rota
-GET  /api/v1/navigation/geocode/    # Buscar endereço
-GET  /api/v1/content/news/          # Notícias
-GET  /api/v1/content/events/        # Eventos
-GET  /api/v1/content/pois/          # Pontos de interesse
+# Frontend
+docker compose exec frontend-totem npm test
 ```
 
----
+## 🔧 Comandos Úteis
+```bash
+# Ver logs de todos os serviços
+docker compose logs -f
+
+# Ver logs de um serviço específico
+docker compose logs -f backend
+
+# Reiniciar um serviço
+docker compose restart backend
+
+# Executar migrations
+docker compose exec backend python manage.py migrate
+
+# Criar superusuário
+docker compose exec backend python manage.py createsuperuser
+
+# Acessar shell do Django
+docker compose exec backend python manage.py shell
+
+# Rebuild completo
+docker compose down
+docker compose up -d --build
+
+# Limpar volumes (CUIDADO: apaga dados)
+docker compose down -v
+```
 
 ## 🐛 Troubleshooting
 
-### Erro de conexão com banco
+### Erro de CORS
+Verifique se o `ALLOWED_HOSTS` no `.env` inclui o IP do frontend.
+
+### API de rotas não funciona
+1. Verifique se `OPENROUTESERVICE_API_KEY` está configurado
+2. Reinicie o backend após alterar o `.env`
+
+### Traduções não atualizam
+1. Limpe o localStorage do navegador
+2. Faça hard refresh (Ctrl+Shift+F5)
+
+### Container não inicia
 ```bash
-docker-compose logs db
-docker-compose exec db psql -U postgres -c "SELECT 1"
+docker compose logs <service-name>
 ```
 
-### Erro de CORS
-- Verificar `CORS_ALLOWED_ORIGINS` no `.env`
-- Reiniciar: `docker-compose restart backend`
+## 📄 Licença
 
-### Frontend não conecta na API
-- Verificar `REACT_APP_API_URL` no frontend
-- Verificar se backend está rodando: `curl http://localhost:8000/api/v1/core/health/`
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## 👥 Contribuição
+
+1. Fork o projeto
+2. Crie sua feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📞 Suporte
+
+- **Issues**: https://github.com/mcoutinho2512/totem-interativo/issues
+- **Email**: suporte@sanaris.com.br
+
+## 🙏 Agradecimentos
+
+- [OpenRouteService](https://openrouteservice.org/) - API de rotas
+- [OpenStreetMap](https://www.openstreetmap.org/) - Mapas
+- [React Leaflet](https://react-leaflet.js.org/) - Componentes de mapa
+- [i18next](https://www.i18next.com/) - Internacionalização
 
 ---
 
-## 📝 Licença
-
-Projeto desenvolvido para uso interno.
-
----
-
-## 🤝 Suporte
-
-Desenvolvido por Sanaris | 2024
+Desenvolvido com ❤️ por [Sanaris](https://github.com/mcoutinho2512)
