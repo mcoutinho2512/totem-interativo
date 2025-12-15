@@ -4,7 +4,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CategoryViewSet, NewsViewSet, EventViewSet,
     GalleryImageViewSet, PointOfInterestViewSet,
-    PlaylistViewSet, PlaylistItemViewSet, RSSFeedViewSet
+    PlaylistViewSet, PlaylistItemViewSet, RSSFeedViewSet,
+    FileUploadView, GalleryUploadView, BulkUploadView
 )
 
 router = DefaultRouter()
@@ -19,4 +20,8 @@ router.register(r'rss-feeds', RSSFeedViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    # Upload endpoints
+    path('upload/', FileUploadView.as_view(), name='file-upload'),
+    path('gallery/upload/', GalleryUploadView.as_view(), name='gallery-upload'),
+    path('bulk-upload/', BulkUploadView.as_view(), name='bulk-upload'),
 ]

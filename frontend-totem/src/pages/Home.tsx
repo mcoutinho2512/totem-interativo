@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTotemStore } from '../store/totemStore';
-import { contentService, weatherService, advertisingService } from '../services/api';
+import { weatherService, advertisingService } from '../services/api';
 import styles from '../styles/Home.module.css';
 
 interface WeatherData {
@@ -13,10 +13,8 @@ interface WeatherData {
 
 interface SlideItem {
   id: number;
-  title: string;
   image: string;
-  type: 'gallery' | 'ad';
-  advertiser?: string;
+  duration: number;
 }
 
 const Home: React.FC = () => {
@@ -38,34 +36,15 @@ const Home: React.FC = () => {
           setWeather(weatherRes.data);
         }
 
-        // Carregar galeria
-        const galleryRes = await contentService.getGallery();
-        const gallerySlides: SlideItem[] = (galleryRes.data?.results || galleryRes.data || []).map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          image: item.image,
-          type: 'gallery' as const
-        }));
-
-        // Carregar anúncios
+        // Carregar SOMENTE anúncios ativos
         const adsRes = await advertisingService.getActiveAds(totem?.id || 1);
         const adSlides: SlideItem[] = (adsRes.data || []).map((ad: any) => ({
           id: ad.id,
-          title: ad.name,
           image: ad.file.startsWith('http') ? ad.file : `http://10.50.30.168:8000${ad.file}`,
-          type: 'ad' as const,
-          advertiser: ad.name
+          duration: ad.duration || 8
         }));
 
-        // Intercalar: galeria, ad, galeria, ad...
-        const combined: SlideItem[] = [];
-        const maxLen = Math.max(gallerySlides.length, adSlides.length);
-        for (let i = 0; i < maxLen; i++) {
-          if (gallerySlides[i]) combined.push(gallerySlides[i]);
-          if (adSlides[i]) combined.push(adSlides[i]);
-        }
-
-        setSlides(combined.length > 0 ? combined : gallerySlides);
+        setSlides(adSlides);
       } catch (error) {
         console.error('Error loading data:', error);
       }
@@ -77,21 +56,22 @@ const Home: React.FC = () => {
     return () => clearInterval(interval);
   }, [totem]);
 
-  // Auto-rotate slides
+  // Auto-rotate slides usando a duração de cada anúncio
   useEffect(() => {
-    if (slides.length > 1 && !isInteracting) {
-      const timer = setInterval(() => {
+    if (slides.length > 0 && !isInteracting) {
+      const currentDuration = (slides[currentSlide]?.duration || 8) * 1000;
+      const timer = setTimeout(() => {
         setCurrentSlide(prev => (prev + 1) % slides.length);
-      }, 6000);
-      return () => clearInterval(timer);
+      }, currentDuration);
+      return () => clearTimeout(timer);
     }
-  }, [slides.length, isInteracting]);
+  }, [slides, currentSlide, isInteracting]);
 
   // Registrar impressão de anúncio
   useEffect(() => {
     const currentItem = slides[currentSlide];
-    if (currentItem?.type === 'ad' && totem?.id) {
-      advertisingService.logImpression(currentItem.id, totem.id, 6).catch(() => {});
+    if (currentItem && totem?.id) {
+      advertisingService.logImpression(currentItem.id, totem.id, currentItem.duration || 8).catch(() => {});
     }
   }, [currentSlide, slides, totem]);
 
@@ -100,59 +80,34 @@ const Home: React.FC = () => {
     navigate('/home-tomi');
   };
 
-  const quickActions = [
-    { icon: '🗺️', labelKey: 'home.directions', path: '/navigation' },
-    { icon: '🌤️', labelKey: 'home.weather', path: '/weather' },
-    { icon: '📅', labelKey: 'home.events', path: '/events' },
-    { icon: '🏥', labelKey: 'home.hospitals', path: '/pois?type=hospital' },
-    { icon: '🍽️', labelKey: 'home.restaurants', path: '/pois?type=restaurant' },
-    { icon: '🚌', labelKey: 'home.transport', path: '/pois?type=transport' },
-  ];
-
   const currentItem = slides[currentSlide];
 
   return (
     <div className={styles.home} onClick={handleInteraction}>
-      {/* Background Slideshow */}
+      {/* Background Slideshow - Imagem sem título */}
       <div className={styles.backgroundSlideshow}>
-        {slides.length > 0 && (
-          <img 
-            src={currentItem?.image} 
-            alt={currentItem?.title}
+        {slides.length > 0 && currentItem && (
+          <img
+            src={currentItem.image}
+            alt=""
             className={styles.backgroundImage}
           />
         )}
-        <div className={styles.backgroundOverlay} />
       </div>
 
-      {/* Weather Widget */}
-      {weather && (
-        <div className={styles.weatherWidget}>
-          <img src={weather.icon_url} alt={weather.description} />
-          <span className={styles.temp}>{Math.round(weather.temperature)}°C</span>
-        </div>
-      )}
-
-      {/* City Name */}
-      <div className={styles.cityInfo}>
-        <h1>{totem?.city_name || 'Niteroi'}</h1>
-        {weather && <p>{weather.description}</p>}
+      {/* Header com cidade e hora */}
+      <div className={styles.topBar}>
+        <span className={styles.cityName}>{totem?.city_name || 'Niteroi'}</span>
+        <span className={styles.clock}>{new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
-
-      {/* Ad Badge - mostrar quando for anúncio */}
-      {currentItem?.type === 'ad' && (
-        <div className={styles.adBadge}>
-          <span>📢 {currentItem.advertiser}</span>
-        </div>
-      )}
 
       {/* Slide Indicators */}
       {slides.length > 1 && (
         <div className={styles.slideIndicators}>
-          {slides.map((slide, idx) => (
-            <span 
+          {slides.map((_, idx) => (
+            <span
               key={idx}
-              className={`${styles.indicator} ${idx === currentSlide ? styles.active : ''} ${slide.type === 'ad' ? styles.adIndicator : ''}`}
+              className={`${styles.indicator} ${idx === currentSlide ? styles.active : ''}`}
             />
           ))}
         </div>
@@ -161,12 +116,7 @@ const Home: React.FC = () => {
       {/* Call to Action */}
       <div className={styles.callToAction}>
         <span className={styles.handIcon}>👆</span>
-        <p>{t('home.touchToInteract', 'Toque para interagir')}</p>
-      </div>
-
-      {/* Location */}
-      <div className={styles.location}>
-        <span>📍 {totem?.address || 'Praça Arariboia, Centro'}</span>
+        <p>{t('home.touchToInteract', 'TOQUE PARA INTERAGIR')}</p>
       </div>
     </div>
   );

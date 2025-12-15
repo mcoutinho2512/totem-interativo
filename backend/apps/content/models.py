@@ -60,12 +60,12 @@ class Event(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     
     title = models.CharField('Título', max_length=300)
-    description = models.TextField('Descrição')
+    description = models.TextField('Descrição', blank=True)
     image = models.ImageField('Imagem', upload_to='events/', null=True, blank=True)
     
     # Location
-    venue = models.CharField('Local', max_length=300)
-    address = models.CharField('Endereço', max_length=500)
+    venue = models.CharField('Local', max_length=300, blank=True)
+    address = models.CharField('Endereço', max_length=500, blank=True)
     latitude = models.DecimalField('Latitude', max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField('Longitude', max_digits=10, decimal_places=7, null=True, blank=True)
     

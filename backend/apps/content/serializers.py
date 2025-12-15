@@ -1,17 +1,27 @@
 """Content Serializers"""
 from rest_framework import serializers
 from .models import Category, News, Event, GalleryImage, PointOfInterest
+from apps.tenants.models import City
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), required=False)
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'icon', 'color', 'order', 'is_active']
+        fields = ['id', 'city', 'name', 'slug', 'icon', 'color', 'order', 'is_active']
+
+    def create(self, validated_data):
+        if 'city' not in validated_data:
+            validated_data['city'] = City.objects.first()
+        return super().create(validated_data)
 
 
 class NewsSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
-    
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), required=False)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=False, allow_null=True)
+
     class Meta:
         model = News
         fields = [
@@ -22,10 +32,17 @@ class NewsSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
 
+    def create(self, validated_data):
+        if 'city' not in validated_data:
+            validated_data['city'] = City.objects.first()
+        return super().create(validated_data)
+
 
 class EventSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
-    
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), required=False)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=False, allow_null=True)
+
     class Meta:
         model = Event
         fields = [
@@ -38,8 +55,16 @@ class EventSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
 
+    def create(self, validated_data):
+        if 'city' not in validated_data:
+            validated_data['city'] = City.objects.first()
+        return super().create(validated_data)
+
 
 class GalleryImageSerializer(serializers.ModelSerializer):
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), required=False)
+    image = serializers.ImageField(required=False)
+
     class Meta:
         model = GalleryImage
         fields = [
@@ -47,11 +72,18 @@ class GalleryImageSerializer(serializers.ModelSerializer):
             'order', 'is_active', 'display_start', 'display_end', 'created_at'
         ]
 
+    def create(self, validated_data):
+        if 'city' not in validated_data:
+            validated_data['city'] = City.objects.first()
+        return super().create(validated_data)
+
 
 class PointOfInterestSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     poi_type_display = serializers.CharField(source='get_poi_type_display', read_only=True)
-    
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), required=False)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=False, allow_null=True)
+
     class Meta:
         model = PointOfInterest
         fields = [
@@ -62,6 +94,11 @@ class PointOfInterestSerializer(serializers.ModelSerializer):
             'is_featured', 'is_active',
             'created_at', 'updated_at'
         ]
+
+    def create(self, validated_data):
+        if 'city' not in validated_data:
+            validated_data['city'] = City.objects.first()
+        return super().create(validated_data)
 
 
 # Playlist Serializers
