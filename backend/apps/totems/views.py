@@ -67,7 +67,7 @@ class TotemSessionViewSet(viewsets.ModelViewSet):
         session = TotemSession.objects.create(
             totem=totem,
             language=language,
-            ip_address=request.META.get('REMOTE_ADDR', '')
+            session_id=str(totem.id) + '-' + str(int(__import__('time').time()))
         )
         
         serializer = self.get_serializer(session)

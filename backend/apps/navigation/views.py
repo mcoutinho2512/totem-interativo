@@ -8,8 +8,14 @@ from apps.totems.models import Totem
 class RouteView(views.APIView):
     """Calculate route between two points"""
     permission_classes = [permissions.AllowAny]
-    
+
     def post(self, request):
+        # Debug logging
+        print(f"[DEBUG] RouteView received request.data: {request.data}")
+        print(f"[DEBUG] RouteView content_type: {request.content_type}")
+        import sys
+        sys.stdout.flush()
+
         origin_lat = request.data.get('origin_lat')
         origin_lng = request.data.get('origin_lng')
         dest_lat = request.data.get('destination_lat')
@@ -17,7 +23,10 @@ class RouteView(views.APIView):
         dest_name = request.data.get('destination_name', '')
         mode = request.data.get('mode', 'walking')
         totem_id = request.data.get('totem_id')
-        
+
+        print(f"[DEBUG] Parsed values: origin=({origin_lat}, {origin_lng}), dest=({dest_lat}, {dest_lng})")
+        sys.stdout.flush()
+
         if not all([origin_lat, origin_lng, dest_lat, dest_lng]):
             return Response(
                 {'error': 'origin and destination coordinates required'},

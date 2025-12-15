@@ -35,11 +35,16 @@ const Navigation: React.FC = () => {
   
   const getTotemLocation = (): [number, number] => {
     if (totem?.latitude && totem?.longitude) {
-      return [Number(totem.latitude), Number(totem.longitude)];
+      const lat = Number(totem.latitude);
+      const lng = Number(totem.longitude);
+      // Validate that the conversion resulted in valid numbers
+      if (!isNaN(lat) && !isNaN(lng)) {
+        return [lat, lng];
+      }
     }
     return defaultCenter;
   };
-  
+
   const totemLocation = getTotemLocation();
 
   useEffect(() => {
@@ -54,8 +59,18 @@ const Navigation: React.FC = () => {
   }, [searchParams]);
 
   const handleRoute = async (destLat: number, destLng: number) => {
+    // Validate coordinates before making the request
+    if (isNaN(destLat) || isNaN(destLng)) {
+      console.error('Invalid destination coordinates:', { destLat, destLng });
+      return;
+    }
+
     setLoading(true);
     try {
+      console.log('[Navigation] Requesting route:', {
+        from: totemLocation,
+        to: [destLat, destLng],
+      });
       const res = await navigationService.getRoute(totemLocation, [destLat, destLng]);
       setRoute(res.data);
     } catch (err) {
@@ -70,8 +85,8 @@ const Navigation: React.FC = () => {
     try {
       const res = await navigationService.geocode(search);
       if (res.data.results?.length > 0) {
-        const { lat, lng } = res.data.results[0];
-        await handleRoute(lat, lng);
+        const { latitude, longitude } = res.data.results[0];
+        await handleRoute(latitude, longitude);
       }
     } catch (err) {
       console.error('Geocode error:', err);

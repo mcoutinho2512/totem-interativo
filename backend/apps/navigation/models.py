@@ -50,24 +50,27 @@ class RouteService:
     def get_route(self, origin: tuple, destination: tuple, mode: str = 'walking') -> dict:
         """
         Get route between two points
-        
+
         Args:
             origin: (lat, lng) tuple
             destination: (lat, lng) tuple
             mode: 'walking', 'driving', or 'cycling'
-        
+
         Returns:
             Route data with geometry, distance, duration, and steps
         """
         profile = self.PROFILE_MAP.get(mode, 'foot-walking')
-        
+
         # ORS expects [lng, lat] format
+        dest_lng = float(destination[1])
+        dest_lat = float(destination[0])
         coordinates = [
             [float(origin[1]), float(origin[0])],
-            [float(destination[1]), float(destination[0])]
+            [dest_lng, dest_lat]
         ]
-        
-        url = f"{self.BASE_URL}/v2/directions/{profile}"
+
+        # Use GeoJSON endpoint for coordinates in response
+        url = f"{self.BASE_URL}/v2/directions/{profile}/geojson"
         headers = {
             'Authorization': self.api_key,
             'Content-Type': 'application/json'
@@ -78,28 +81,34 @@ class RouteService:
             'language': 'pt',
             'units': 'm'
         }
-        
+
         try:
             with httpx.Client() as client:
                 response = client.post(url, json=body, headers=headers, timeout=10.0)
                 response.raise_for_status()
                 data = response.json()
-                
-                if 'routes' in data and len(data['routes']) > 0:
-                    route = data['routes'][0]
-                    summary = route.get('summary', {})
-                    
+
+                if 'features' in data and len(data['features']) > 0:
+                    feature = data['features'][0]
+                    props = feature.get('properties', {})
+                    geometry = feature.get('geometry', {})
+                    summary = props.get('summary', {})
+
                     return {
                         'success': True,
                         'distance': summary.get('distance', 0),
                         'duration': summary.get('duration', 0),
-                        'geometry': route.get('geometry'),
-                        'steps': self._parse_steps(route.get('segments', [])),
-                        'mode': mode
+                        'geometry': geometry,
+                        'steps': self._parse_steps(props.get('segments', [])),
+                        'mode': mode,
+                        'destination': {
+                            'lat': dest_lat,
+                            'lng': dest_lng
+                        }
                     }
-                
+
                 return {'success': False, 'error': 'No route found'}
-                
+
         except httpx.HTTPError as e:
             return {'success': False, 'error': str(e)}
     

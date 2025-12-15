@@ -12,14 +12,24 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const totemId = localStorage.getItem('totem_id');
   const cityId = localStorage.getItem('city_id');
-  
+
   if (totemId) {
     config.headers['X-Totem-ID'] = totemId;
   }
   if (cityId) {
     config.headers['X-City-ID'] = cityId;
   }
-  
+
+  // Debug: log request data for navigation routes
+  if (config.url?.includes('/navigation/')) {
+    console.log('[API Debug] Navigation request:', {
+      url: config.url,
+      method: config.method,
+      data: config.data,
+      headers: config.headers,
+    });
+  }
+
   return config;
 });
 
@@ -55,28 +65,40 @@ export const contentService = {
 };
 
 export const navigationService = {
-  getRoute: (from: [number, number], to: [number, number], mode: string = 'foot-walking') =>
-    api.post('/navigation/route/', {
-      from_lat: from[0],
-      from_lng: from[1],
-      to_lat: to[0],
-      to_lng: to[1],
+  getRoute: (from: [number, number], to: [number, number], mode: string = 'walking') => {
+    // Validate that all coordinates are valid numbers
+    const data = {
+      origin_lat: from[0],
+      origin_lng: from[1],
+      destination_lat: to[0],
+      destination_lng: to[1],
       mode,
-    }),
+    };
+
+    // Check for NaN values which would serialize as null
+    const hasInvalidCoord = [data.origin_lat, data.origin_lng, data.destination_lat, data.destination_lng]
+      .some(coord => typeof coord !== 'number' || isNaN(coord));
+
+    if (hasInvalidCoord) {
+      console.error('[API] Invalid coordinates detected:', data);
+      return Promise.reject(new Error('Invalid coordinates'));
+    }
+
+    return api.post('/navigation/route/', data);
+  },
   getAllRoutes: (from: [number, number], to: [number, number]) =>
     api.post('/navigation/routes/', {
-      from_lat: from[0],
-      from_lng: from[1],
-      to_lat: to[0],
-      to_lng: to[1],
+      origin_lat: from[0],
+      origin_lng: from[1],
+      destination_lat: to[0],
+      destination_lng: to[1],
     }),
   geocode: (query: string) => api.get(`/navigation/geocode/?q=${encodeURIComponent(query)}`),
-  getQRCode: (from: [number, number], to: [number, number]) =>
+  getQRCode: (destLat: number, destLng: number, destName: string = 'Destination') =>
     api.post('/navigation/qrcode/', {
-      from_lat: from[0],
-      from_lng: from[1],
-      to_lat: to[0],
-      to_lng: to[1],
+      destination_lat: destLat,
+      destination_lng: destLng,
+      destination_name: destName,
     }),
 };
 
