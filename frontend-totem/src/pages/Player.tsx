@@ -1,39 +1,27 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTotemStore } from '../store/totemStore';
-import { contentService, weatherService } from '../services/api';
+import { contentService, weatherService, advertisingService } from '../services/api';
 import styles from '../styles/Player.module.css';
 
-interface PlaylistItem {
+interface SlideItem {
   id: number;
-  item_type: string;
-  name: string;
+  type: 'gallery' | 'ad' | 'weather' | 'clock';
+  title: string;
   image?: string;
-  video_url?: string;
-  html_content?: string;
   duration: number;
-  transition: string;
-  background_color: string;
-  text_color: string;
-}
-
-interface Playlist {
-  id: number;
-  name: string;
-  items: PlaylistItem[];
-  total_duration: number;
+  advertiser?: string;
 }
 
 const Player: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { totem } = useTotemStore();
   
-  const [playlist, setPlaylist] = useState<Playlist | null>(null);
+  const [slides, setSlides] = useState<SlideItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isIdle, setIsIdle] = useState(true);
   const [weather, setWeather] = useState<any>(null);
-  const [news, setNews] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [transitioning, setTransitioning] = useState(false);
 
@@ -43,137 +31,125 @@ const Player: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Load playlist
+  // Load all content
   useEffect(() => {
-    const loadPlaylist = async () => {
+    const loadContent = async () => {
       try {
-        const response = await contentService.getCurrentPlaylist();
-        if (response.data && response.data.items?.length > 0) {
-          setPlaylist(response.data);
+        // Weather
+        if (totem?.city) {
+          const weatherRes = await weatherService.getCurrent(totem.city);
+          setWeather(weatherRes.data);
         }
+
+        const allSlides: SlideItem[] = [];
+
+        // Slide de relógio/clima (primeiro)
+        allSlides.push({
+          id: 0,
+          type: 'clock',
+          title: 'Relógio',
+          duration: 8
+        });
+
+        // Carregar galeria
+        try {
+          const galleryRes = await contentService.getGallery();
+          const galleryData = galleryRes.data?.results || galleryRes.data || [];
+          galleryData.forEach((item: any, idx: number) => {
+            allSlides.push({
+              id: item.id,
+              type: 'gallery',
+              title: item.title,
+              image: item.image,
+              duration: 6
+            });
+          });
+        } catch (e) {
+          console.log('No gallery');
+        }
+
+        // Carregar anúncios
+        try {
+          const adsRes = await advertisingService.getActiveAds(totem?.id || 1);
+          const adsData = adsRes.data || [];
+          adsData.forEach((ad: any) => {
+            allSlides.push({
+              id: ad.id,
+              type: 'ad',
+              title: ad.name,
+              image: ad.file.startsWith('http') ? ad.file : `http://10.50.30.168:8000${ad.file}`,
+              duration: ad.duration || 8,
+              advertiser: ad.name
+            });
+          });
+        } catch (e) {
+          console.log('No ads');
+        }
+
+        // Intercalar: clock, gallery, ad, gallery, ad...
+        const finalSlides: SlideItem[] = [];
+        const galleries = allSlides.filter(s => s.type === 'gallery');
+        const ads = allSlides.filter(s => s.type === 'ad');
+        const clock = allSlides.find(s => s.type === 'clock');
+
+        if (clock) finalSlides.push(clock);
+
+        const maxLen = Math.max(galleries.length, ads.length);
+        for (let i = 0; i < maxLen; i++) {
+          if (galleries[i]) finalSlides.push(galleries[i]);
+          if (ads[i]) finalSlides.push(ads[i]);
+        }
+
+        // Se não tem nada, pelo menos mostra o clock
+        if (finalSlides.length === 0 && clock) {
+          finalSlides.push(clock);
+        }
+
+        setSlides(finalSlides);
       } catch (error) {
-        console.log('No playlist available, using default content');
+        console.error('Error loading content:', error);
       }
     };
-    
-    loadPlaylist();
-    const interval = setInterval(loadPlaylist, 60000); // Refresh every minute
-    return () => clearInterval(interval);
-  }, []);
 
-  // Load content for dynamic items
-  useEffect(() => {
-    if (totem?.city) {
-      weatherService.getCurrent(totem.city).then(res => setWeather(res.data)).catch(() => {});
-      contentService.getNews(5).then(res => setNews(res.data.results || res.data || [])).catch(() => {});
-      contentService.getEvents(5).then(res => setEvents(res.data.results || res.data || [])).catch(() => {});
-    }
+    loadContent();
+    const interval = setInterval(loadContent, 300000); // Refresh every 5 min
+    return () => clearInterval(interval);
   }, [totem]);
 
-  // Auto-advance playlist
+  // Auto-advance slides
   useEffect(() => {
-    if (!playlist || !isIdle || playlist.items.length === 0) return;
+    if (slides.length === 0) return;
     
-    const currentItem = playlist.items[currentIndex];
-    const duration = currentItem?.duration || 10;
+    const currentItem = slides[currentIndex];
+    const duration = currentItem?.duration || 8;
     
     const timer = setTimeout(() => {
       setTransitioning(true);
       setTimeout(() => {
-        setCurrentIndex(prev => (prev + 1) % playlist.items.length);
+        setCurrentIndex(prev => (prev + 1) % slides.length);
         setTransitioning(false);
       }, 500);
     }, duration * 1000);
     
     return () => clearTimeout(timer);
-  }, [currentIndex, playlist, isIdle]);
+  }, [currentIndex, slides]);
+
+  // Log ad impression
+  useEffect(() => {
+    const currentItem = slides[currentIndex];
+    if (currentItem?.type === 'ad' && totem?.id) {
+      advertisingService.logImpression(currentItem.id, totem.id, currentItem.duration).catch(() => {});
+    }
+  }, [currentIndex, slides, totem]);
 
   // Handle touch - go to interactive mode
   const handleTouch = useCallback(() => {
-    setIsIdle(false);
     navigate('/?theme=tomi');
   }, [navigate]);
 
-  // Render content based on item type
-  const renderContent = (item: PlaylistItem) => {
-    switch (item.item_type) {
-      case 'image':
-      case 'ad':
-        return (
-          <div className={styles.imageSlide} style={{ backgroundColor: item.background_color }}>
-            {item.image && <img src={item.image} alt={item.name} />}
-            {item.item_type === 'ad' && <div className={styles.adBadge}>Publicidade</div>}
-          </div>
-        );
-      
-      case 'video':
-        return (
-          <div className={styles.videoSlide}>
-            <video autoPlay muted loop src={item.video_url} />
-          </div>
-        );
-      
-      case 'weather':
-        return (
-          <div className={styles.weatherSlide}>
-            <div className={styles.weatherCity}>{totem?.city_name || 'Sua Cidade'}</div>
-            {weather && (
-              <>
-                <img src={weather.icon_url} alt="" className={styles.weatherIcon} />
-                <div className={styles.weatherTemp}>{Math.round(weather.temperature)}°C</div>
-                <div className={styles.weatherDesc}>{weather.description}</div>
-                <div className={styles.weatherDetails}>
-                  <span>💧 {weather.humidity}%</span>
-                  <span>💨 {weather.wind_speed} km/h</span>
-                </div>
-              </>
-            )}
-          </div>
-        );
-      
-      case 'news':
-        return (
-          <div className={styles.newsSlide}>
-            <h2>📰 Notícias</h2>
-            <div className={styles.newsList}>
-              {news.slice(0, 4).map((item, idx) => (
-                <div key={idx} className={styles.newsItem}>
-                  {item.image && <img src={item.image} alt="" />}
-                  <div className={styles.newsContent}>
-                    <h3>{item.title}</h3>
-                    <p>{item.subtitle}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      
-      case 'events':
-        return (
-          <div className={styles.eventsSlide}>
-            <h2>📅 Eventos</h2>
-            <div className={styles.eventsList}>
-              {events.slice(0, 4).map((event, idx) => (
-                <div key={idx} className={styles.eventItem}>
-                  <div className={styles.eventDate}>
-                    <span className={styles.eventDay}>
-                      {new Date(event.start_date).getDate()}
-                    </span>
-                    <span className={styles.eventMonth}>
-                      {new Date(event.start_date).toLocaleDateString('pt-BR', { month: 'short' })}
-                    </span>
-                  </div>
-                  <div className={styles.eventInfo}>
-                    <h3>{event.title}</h3>
-                    <p>�� {event.venue}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      
+  // Render slide content
+  const renderSlide = (item: SlideItem) => {
+    switch (item.type) {
       case 'clock':
         return (
           <div className={styles.clockSlide}>
@@ -188,59 +164,58 @@ const Player: React.FC = () => {
                 year: 'numeric'
               })}
             </div>
-            <div className={styles.clockCity}>{totem?.city_name}</div>
+            <div className={styles.clockCity}>{totem?.city_name || 'Niteroi'}</div>
+            {weather && (
+              <div className={styles.clockWeather}>
+                <img src={weather.icon_url} alt="" />
+                <span className={styles.clockTemp}>{Math.round(weather.temperature)}°C</span>
+                <span className={styles.clockDesc}>{weather.description}</span>
+              </div>
+            )}
           </div>
         );
-      
-      case 'html':
+
+      case 'gallery':
+      case 'ad':
         return (
-          <div 
-            className={styles.htmlSlide}
-            dangerouslySetInnerHTML={{ __html: item.html_content || '' }}
-          />
+          <div className={styles.imageSlide}>
+            <img src={item.image} alt={item.title} className={styles.slideImage} />
+            <div className={styles.imageOverlay} />
+            {item.type === 'ad' && (
+              <div className={styles.adBadge}>
+                <span>📢 Publicidade</span>
+                <span className={styles.advertiserName}>{item.advertiser}</span>
+              </div>
+            )}
+            {item.type === 'gallery' && (
+              <div className={styles.galleryTitle}>
+                <span>{item.title}</span>
+              </div>
+            )}
+          </div>
         );
-      
+
       default:
         return (
           <div className={styles.defaultSlide}>
-            <h1>🏙️ {totem?.city_name || 'Sanaris City'}</h1>
+            <h1>🏙️ {totem?.city_name || 'Niteroi'}</h1>
             <p>Toque para explorar</p>
           </div>
         );
     }
   };
 
-  // Default content if no playlist
-  const renderDefaultContent = () => (
-    <div className={styles.defaultSlide}>
-      <div className={styles.defaultContent}>
-        <span className={styles.defaultIcon}>🏙️</span>
-        <h1>{totem?.city_name || 'Sanaris City Totem'}</h1>
-        <p>Toque na tela para explorar</p>
-        <div className={styles.defaultTime}>
-          {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-        </div>
-        {weather && (
-          <div className={styles.defaultWeather}>
-            <img src={weather.icon_url} alt="" />
-            <span>{Math.round(weather.temperature)}°C</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const currentItem = playlist?.items[currentIndex];
+  const currentItem = slides[currentIndex];
 
   return (
     <div className={styles.player} onClick={handleTouch}>
       {/* Progress bar */}
-      {playlist && playlist.items.length > 1 && (
+      {slides.length > 1 && (
         <div className={styles.progressBar}>
-          {playlist.items.map((_, idx) => (
+          {slides.map((slide, idx) => (
             <div 
               key={idx} 
-              className={`${styles.progressDot} ${idx === currentIndex ? styles.active : ''} ${idx < currentIndex ? styles.done : ''}`}
+              className={`${styles.progressDot} ${idx === currentIndex ? styles.active : ''} ${slide.type === 'ad' ? styles.adDot : ''}`}
             />
           ))}
         </div>
@@ -248,7 +223,14 @@ const Player: React.FC = () => {
 
       {/* Main content */}
       <div className={`${styles.content} ${transitioning ? styles.fadeOut : styles.fadeIn}`}>
-        {currentItem ? renderContent(currentItem) : renderDefaultContent()}
+        {currentItem ? renderSlide(currentItem) : (
+          <div className={styles.clockSlide}>
+            <div className={styles.clockTime}>
+              {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            </div>
+            <div className={styles.clockCity}>{totem?.city_name || 'Niteroi'}</div>
+          </div>
+        )}
       </div>
 
       {/* Touch indicator */}
@@ -261,7 +243,7 @@ const Player: React.FC = () => {
       <div className={styles.headerOverlay}>
         <div className={styles.logo}>
           <span>🏙️</span>
-          <span>{totem?.city_name || 'SANARIS'}</span>
+          <span>{totem?.city_name || 'Niteroi'}</span>
         </div>
         <div className={styles.headerRight}>
           <span className={styles.time}>

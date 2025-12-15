@@ -56,7 +56,7 @@ export const contentService = {
   getFeaturedEvents: () => api.get('/content/events/featured/'),
   getGallery: () => api.get('/content/gallery/active/'),
   getPOIs: (type?: string) => api.get(`/content/pois/${type ? '?poi_type=' + type : ''}`),
-  getNearbyPOIs: (lat: number, lng: number, radius?: number) => 
+  getNearbyPOIs: (lat: number, lng: number, radius?: number) =>
     api.get(`/content/pois/nearby/?lat=${lat}&lng=${lng}${radius ? '&radius=' + radius : ''}`),
   getCategories: () => api.get('/content/categories/'),
   getCurrentPlaylist: () => api.get('/content/playlists/current/'),
@@ -103,7 +103,7 @@ export const navigationService = {
 };
 
 export const advertisingService = {
-  getActiveAds: (totemId: number) => api.get(`/advertising/active/?totem=${totemId}`),
+  getActiveAds: (totemId: number) => api.get(`/advertising/active/?totem_id=${totemId}`),
   logImpression: (creativeId: number, totemId: number, duration: number) =>
     api.post('/advertising/active/', { creative_id: creativeId, totem_id: totemId, view_duration: duration }),
 };

@@ -1,4 +1,5 @@
 """Advertising Views"""
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
@@ -27,7 +28,7 @@ class ActiveAdsView(viewsets.ViewSet):
         
         if totem_id:
             campaigns = campaigns.filter(
-                models.Q(all_totems=True) | models.Q(totems__id=totem_id)
+                Q(all_totems=True) | Q(totems__id=totem_id)
             )
         
         creatives = AdCreative.objects.filter(
