@@ -2,6 +2,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils import timezone
 
 from .models import Totem, TotemSession
@@ -12,6 +13,7 @@ class TotemViewSet(viewsets.ModelViewSet):
     queryset = Totem.objects.all()
     serializer_class = TotemSerializer
     permission_classes = [permissions.AllowAny]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     @action(detail=True, methods=['post'])
     def heartbeat(self, request, pk=None):
@@ -27,10 +29,10 @@ class TotemViewSet(viewsets.ModelViewSet):
 def identify_totem(request):
     """Identifica totem pelo identifier"""
     identifier = request.data.get('identifier')
-    
+
     if not identifier:
         return Response({'error': 'Identifier required'}, status=400)
-    
+
     try:
         totem = Totem.objects.select_related('city').get(identifier=identifier)
         return Response({
@@ -42,6 +44,10 @@ def identify_totem(request):
             'latitude': str(totem.latitude),
             'longitude': str(totem.longitude),
             'address': totem.address,
+            # Branding fields
+            'logo': totem.logo.url if totem.logo else None,
+            'background_image': totem.background_image.url if totem.background_image else None,
+            'background_color': totem.background_color or '',
         })
     except Totem.DoesNotExist:
         return Response({'error': 'Totem not found'}, status=404)

@@ -240,4 +240,21 @@ export const advertisingService = {
     }),
 };
 
+// Totems Service
+export const totemsService = {
+  getTotems: () =>
+    api.get('/totems/'),
+
+  getTotem: (id: number) =>
+    api.get(`/totems/${id}/`),
+
+  updateTotem: (id: number, data: FormData) =>
+    api.patch(`/totems/${id}/`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  updateTotemJson: (id: number, data: any) =>
+    api.patch(`/totems/${id}/`, data),
+};
+
 export default api;

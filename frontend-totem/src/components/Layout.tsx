@@ -35,15 +35,42 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     localStorage.setItem('language', langCode);
   };
 
+  // Build logo URL with backend prefix if needed
+  const logoUrl = totem?.logo
+    ? (totem.logo.startsWith('http') ? totem.logo : `http://10.50.30.168:8000${totem.logo}`)
+    : null;
+
+  // Build background style
+  const backgroundStyle: React.CSSProperties = {};
+  if (totem?.background_image) {
+    const bgUrl = totem.background_image.startsWith('http')
+      ? totem.background_image
+      : `http://10.50.30.168:8000${totem.background_image}`;
+    backgroundStyle.backgroundImage = `url(${bgUrl})`;
+    backgroundStyle.backgroundSize = 'cover';
+    backgroundStyle.backgroundPosition = 'center';
+  } else if (totem?.background_color) {
+    backgroundStyle.background = totem.background_color;
+  } else {
+    // Default gradient
+    backgroundStyle.background = 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)';
+  }
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} style={backgroundStyle}>
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.logo} onClick={() => navigate('/')}>
-          <span className={styles.logoIcon}>🏙️</span>
-          <span className={styles.logoText}>
-            {totem?.city_name || 'Sanaris City Totem'}
-          </span>
+          {logoUrl ? (
+            <img src={logoUrl} alt={totem?.city_name || 'Logo'} className={styles.logoImage} />
+          ) : (
+            <>
+              <span className={styles.logoIcon}>🏙️</span>
+              <span className={styles.logoText}>
+                {totem?.city_name || 'Sanaris City Totem'}
+              </span>
+            </>
+          )}
         </div>
         
         <div className={styles.languages}>

@@ -33,6 +33,12 @@
   font-weight: bold;
 }
 
+.logoImage {
+  height: 40px;
+  max-width: 200px;
+  object-fit: contain;
+}
+
 .languages {
   display: flex;
   gap: var(--space-sm);

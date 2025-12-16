@@ -22,6 +22,8 @@ import EventsAdmin from './pages/admin/EventsAdmin';
 import NewsAdmin from './pages/admin/NewsAdmin';
 import POIsAdmin from './pages/admin/POIsAdmin';
 import GalleryAdmin from './pages/admin/GalleryAdmin';
+import TotemsAdmin from './pages/admin/TotemsAdmin';
+import SettingsAdmin from './pages/admin/SettingsAdmin';
 
 function App() {
   const { initialize, resetSession } = useTotemStore();
@@ -78,6 +80,8 @@ function App() {
         <Route path="/admin/news" element={<AdminLayout><NewsAdmin /></AdminLayout>} />
         <Route path="/admin/pois" element={<AdminLayout><POIsAdmin /></AdminLayout>} />
         <Route path="/admin/gallery" element={<AdminLayout><GalleryAdmin /></AdminLayout>} />
+        <Route path="/admin/totems" element={<AdminLayout><TotemsAdmin /></AdminLayout>} />
+        <Route path="/admin/settings" element={<AdminLayout><SettingsAdmin /></AdminLayout>} />
       </Routes>
     </BrowserRouter>
   );

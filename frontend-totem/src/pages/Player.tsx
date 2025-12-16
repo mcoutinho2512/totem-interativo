@@ -388,7 +388,15 @@ const Player: React.FC = () => {
       {/* Header overlay */}
       <div className={styles.headerOverlay}>
         <div className={styles.logo}>
-          <span>{totem?.city_name || 'Niteroi'}</span>
+          {totem?.logo ? (
+            <img
+              src={totem.logo.startsWith('http') ? totem.logo : `http://10.50.30.168:8000${totem.logo}`}
+              alt={totem?.city_name || 'Logo'}
+              className={styles.logoImage}
+            />
+          ) : (
+            <span>{totem?.city_name || 'Niteroi'}</span>
+          )}
         </div>
         <div className={styles.headerRight}>
           <span className={styles.time}>

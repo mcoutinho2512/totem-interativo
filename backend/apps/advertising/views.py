@@ -59,6 +59,7 @@ class CampaignSerializer(serializers.ModelSerializer):
 class AdCreativeSerializer(serializers.ModelSerializer):
     campaign_name = serializers.CharField(source='campaign.name', read_only=True)
     impressions_count = serializers.SerializerMethodField()
+    file = serializers.FileField(required=False)
 
     class Meta:
         model = AdCreative

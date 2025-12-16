@@ -12,6 +12,7 @@ import Events from './pages/Events';
 import News from './pages/News';
 import POIs from './pages/POIs';
 import Layout from './components/Layout';
+import Selfie from './pages/Selfie';
 
 const HomeSelector: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -43,6 +44,7 @@ function App() {
         <Route path="/events" element={<Layout><Events /></Layout>} />
         <Route path="/news" element={<Layout><News /></Layout>} />
         <Route path="/pois" element={<Layout><POIs /></Layout>} />
+        <Route path="/selfie" element={<Selfie />} />
       </Routes>
     </BrowserRouter>
   );

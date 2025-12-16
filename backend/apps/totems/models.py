@@ -32,6 +32,14 @@ class Totem(models.Model):
     brightness = models.IntegerField('Brilho (%)', default=80)
     volume = models.IntegerField('Volume (%)', default=50)
     session_timeout = models.IntegerField('Timeout (segundos)', default=60)
+
+    # Customization / Branding
+    logo = models.ImageField('Logo', upload_to='totems/logos/', null=True, blank=True,
+                             help_text='Logo PNG para exibir no cabeçalho (substitui o nome da cidade)')
+    background_image = models.ImageField('Imagem de Fundo', upload_to='totems/backgrounds/', null=True, blank=True,
+                                         help_text='Imagem de fundo para área de interação')
+    background_color = models.CharField('Cor de Fundo', max_length=100, blank=True, default='',
+                                        help_text='Gradiente CSS ou cor sólida (ex: linear-gradient(135deg, #1a1a2e, #16213e))')
     
     # Status
     status = models.CharField('Status', max_length=20, choices=STATUS_CHOICES, default='active')

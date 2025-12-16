@@ -84,7 +84,15 @@ const HomeTomi: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.backgroundWrapper}>
-        {gallery.length > 0 ? (
+        {totem?.background_image ? (
+          <img
+            src={totem.background_image.startsWith('http') ? totem.background_image : `http://10.50.30.168:8000${totem.background_image}`}
+            alt=""
+            className={styles.backgroundImage}
+          />
+        ) : totem?.background_color ? (
+          <div className={styles.backgroundGradient} style={{ background: totem.background_color }} />
+        ) : gallery.length > 0 ? (
           <img src={gallery[currentBg]?.image} alt="" className={styles.backgroundImage} />
         ) : (
           <div className={styles.defaultBackground} />
@@ -94,8 +102,18 @@ const HomeTomi: React.FC = () => {
 
       <header className={styles.header}>
         <div className={styles.logo}>
-          <span className={styles.logoIcon}>🏙️</span>
-          <span className={styles.logoText}>{totem?.city_name || 'SANARIS'}</span>
+          {totem?.logo ? (
+            <img
+              src={totem.logo.startsWith('http') ? totem.logo : `http://10.50.30.168:8000${totem.logo}`}
+              alt={totem?.city_name || 'Logo'}
+              className={styles.logoImage}
+            />
+          ) : (
+            <>
+              <span className={styles.logoIcon}>🏙️</span>
+              <span className={styles.logoText}>{totem?.city_name || 'SANARIS'}</span>
+            </>
+          )}
         </div>
         
         <div className={styles.headerRight}>

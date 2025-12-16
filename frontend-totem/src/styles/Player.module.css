@@ -140,6 +140,12 @@
   font-size: var(--icon-sm);
 }
 
+.logoImage {
+  height: 60px;
+  max-width: 280px;
+  object-fit: contain;
+}
+
 .headerRight {
   display: flex;
   align-items: center;
