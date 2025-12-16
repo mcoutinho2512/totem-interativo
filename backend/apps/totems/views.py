@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils import timezone
 
-from .models import Totem, TotemSession
-from .serializers import TotemSerializer, TotemSessionSerializer
+from .models import Totem, TotemSession, ContentBlock
+from .serializers import TotemSerializer, TotemSessionSerializer, ContentBlockSerializer
 
 
 class TotemViewSet(viewsets.ModelViewSet):
@@ -76,6 +76,36 @@ class TotemSessionViewSet(viewsets.ModelViewSet):
             language=language,
             session_id=str(totem.id) + '-' + str(int(__import__('time').time()))
         )
-        
+
         serializer = self.get_serializer(session)
         return Response(serializer.data, status=201)
+
+
+class ContentBlockViewSet(viewsets.ModelViewSet):
+    """Manage content blocks for totems"""
+    queryset = ContentBlock.objects.all()
+    serializer_class = ContentBlockSerializer
+    permission_classes = [permissions.AllowAny]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        queryset = ContentBlock.objects.all()
+        totem_id = self.request.query_params.get('totem')
+        if totem_id:
+            queryset = queryset.filter(totem_id=totem_id)
+        return queryset.order_by('position', 'order')
+
+    @action(detail=False, methods=['get'])
+    def by_totem(self, request):
+        """Get all content blocks for a specific totem"""
+        totem_id = request.query_params.get('totem_id')
+        if not totem_id:
+            return Response({'error': 'totem_id required'}, status=400)
+
+        blocks = ContentBlock.objects.filter(
+            totem_id=totem_id,
+            is_active=True
+        ).order_by('position', 'order')
+
+        serializer = self.get_serializer(blocks, many=True)
+        return Response(serializer.data)

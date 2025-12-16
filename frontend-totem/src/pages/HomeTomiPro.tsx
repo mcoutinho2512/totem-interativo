@@ -5,30 +5,67 @@ import { useTotemStore } from '../store/totemStore';
 import { weatherService, contentService, advertisingService } from '../services/api';
 import styles from '../styles/HomeTomiPro.module.css';
 
+// SVG Icons para menu (mais nítidos que emojis)
+const MapIcon = () => (
+  <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+    <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+  </svg>
+);
+
+const RouteIcon = () => (
+  <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+  </svg>
+);
+
+const BusIcon = () => (
+  <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+    <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+  </svg>
+);
+
+const CameraIcon = () => (
+  <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+    <circle cx="12" cy="12" r="3.2"/>
+    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+  </svg>
+);
+
 const HomeTomiPro: React.FC = () => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const { totem } = useTotemStore();
   const [weather, setWeather] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
-  const [news, setNews] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
   const [currentAd, setCurrentAd] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const menuItems = [
-    { icon: '🗺️', label: 'MAPA', path: '/navigation' },
-    { icon: '⭐', label: 'DESTAQUES', path: '/pois' },
-    { icon: '📍', label: 'ROTAS', path: '/navigation' },
-    { icon: '🚌', label: 'TRANSPORTE', path: '/pois?type=transport' },
-    { icon: '📅', label: 'AGENDA', path: '/events' },
-    { icon: '📷', label: 'FOTO', path: '/selfie' },
+    { icon: <MapIcon />, label: 'MAPA', path: '/navigation' },
+    { icon: <StarIcon />, label: 'DESTAQUES', path: '/pois' },
+    { icon: <RouteIcon />, label: 'ROTAS', path: '/navigation' },
+    { icon: <BusIcon />, label: 'TRANSPORTE', path: '/pois?type=transport' },
+    { icon: <CalendarIcon />, label: 'AGENDA', path: '/events' },
+    { icon: <CameraIcon />, label: 'FOTO', path: '/selfie' },
   ];
 
   const languages = [
-    { code: 'pt', flag: '🇧🇷' },
-    { code: 'en', flag: '🇺🇸' },
-    { code: 'es', flag: '🇪🇸' },
+    { code: 'pt', label: 'BR' },
+    { code: 'en', label: 'US' },
+    { code: 'es', label: 'ES' },
   ];
 
   useEffect(() => {
@@ -45,10 +82,6 @@ const HomeTomiPro: React.FC = () => {
 
     contentService.getEvents(6)
       .then(res => setEvents(res.data.results || res.data || []))
-      .catch(() => {});
-
-    contentService.getNews(4)
-      .then(res => setNews(res.data.results || res.data || []))
       .catch(() => {});
 
     advertisingService.getActiveAds(totem?.id || 1)
@@ -77,11 +110,12 @@ const HomeTomiPro: React.FC = () => {
     const date = new Date(dateStr);
     return {
       day: date.toLocaleDateString(getLocale(), { day: '2-digit' }),
-      month: date.toLocaleDateString(getLocale(), { month: 'short' }).toUpperCase(),
+      month: date.toLocaleDateString(getLocale(), { month: 'short' }).toUpperCase().replace('.', ''),
     };
   };
 
   const currentAdData = ads[currentAd];
+  const featuredEvent = events[0];
 
   return (
     <div className={styles.container}>
@@ -125,6 +159,17 @@ const HomeTomiPro: React.FC = () => {
               <span className={styles.temp}>{Math.round(weather.temperature)}°</span>
             </div>
           )}
+          <div className={styles.langButtonsHeader}>
+            {languages.map((lang) => (
+              <button
+                key={lang.code}
+                className={`${styles.langBtnHeader} ${i18n.language === lang.code ? styles.active : ''}`}
+                onClick={() => i18n.changeLanguage(lang.code)}
+              >
+                {lang.label}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -177,7 +222,7 @@ const HomeTomiPro: React.FC = () => {
         </div>
       </section>
 
-      {/* Menu Bar */}
+      {/* Menu Bar - Botões Grandes */}
       <nav className={styles.menuBar}>
         {menuItems.map((item, idx) => (
           <button
@@ -185,49 +230,97 @@ const HomeTomiPro: React.FC = () => {
             className={styles.menuItem}
             onClick={() => navigate(item.path)}
           >
-            <span className={styles.menuIcon}>{item.icon}</span>
+            <span className={styles.menuIconSvg}>{item.icon}</span>
             <span className={styles.menuLabel}>{item.label}</span>
           </button>
         ))}
       </nav>
 
-      {/* Content Area */}
+      {/* Content Area - Mosaico 2x2 */}
       <section className={styles.contentArea}>
-        {/* Featured Event (Large) */}
-        <div className={styles.featuredSection}>
-          {events[0] && (
-            <div className={styles.featuredCard} onClick={() => navigate('/events')}>
-              <div className={styles.featuredImage}>
-                {events[0].image ? (
-                  <img src={events[0].image} alt="" />
-                ) : (
-                  <div className={styles.placeholderImage}>📅</div>
-                )}
-              </div>
-              <div className={styles.featuredInfo}>
-                {events[0].start_date && (
-                  <div className={styles.featuredDate}>
-                    <span className={styles.dateDay}>{formatDate(events[0].start_date).day}</span>
-                    <span className={styles.dateMonth}>{formatDate(events[0].start_date).month}</span>
+        {/* Quadrante 1: Lista de Eventos (superior esquerdo) */}
+        <div className={styles.eventsBlock}>
+          <div className={styles.blockHeader}>
+            <span>📅</span> PRÓXIMOS EVENTOS
+          </div>
+          <div className={styles.blockEventsList}>
+            {events.slice(0, 4).map((event, idx) => (
+              <div key={idx} className={styles.eventItem} onClick={() => navigate('/events')}>
+                {event.start_date && (
+                  <div className={styles.eventDate}>
+                    <span className={styles.eventDay}>{formatDate(event.start_date).day}</span>
+                    <span className={styles.eventMonth}>{formatDate(event.start_date).month}</span>
                   </div>
                 )}
-                <div className={styles.featuredText}>
-                  <h3>{events[0].title}</h3>
-                  <p>{events[0].location || events[0].description?.substring(0, 80)}</p>
+                <div className={styles.eventInfo}>
+                  <span className={styles.eventTitle}>{event.title}</span>
+                  <span className={styles.eventLocation}>{event.location}</span>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quadrante 2: Evento em Destaque (superior direito) */}
+        <div className={styles.featuredSection}>
+          {featuredEvent ? (
+            <div className={styles.featuredCard} onClick={() => navigate('/events')}>
+              {featuredEvent.start_date && (
+                <div className={styles.featuredDate}>
+                  <span className={styles.dateDay}>{formatDate(featuredEvent.start_date).day}</span>
+                  <span className={styles.dateMonth}>{formatDate(featuredEvent.start_date).month}</span>
+                </div>
+              )}
+              <h3 className={styles.featuredTitle}>{featuredEvent.title}</h3>
+              <p className={styles.featuredDescription}>
+                {featuredEvent.description?.substring(0, 150) || featuredEvent.location}
+              </p>
+            </div>
+          ) : (
+            <div className={styles.featuredCard}>
+              <h3 className={styles.featuredTitle}>Eventos</h3>
+              <p className={styles.featuredDescription}>
+                Confira os eventos da cidade
+              </p>
             </div>
           )}
         </div>
 
-        {/* Events List (Right Side) */}
-        <div className={styles.eventsList}>
-          <div className={styles.eventsHeader}>
-            <span>📅 AGENDA</span>
-            <button onClick={() => navigate('/events')}>Ver todos →</button>
+        {/* Quadrante 3: Evento em Destaque 2 (inferior esquerdo) */}
+        <div className={styles.featuredSection2}>
+          {events[1] ? (
+            <div className={styles.featuredCard} onClick={() => navigate('/events')}>
+              {events[1].start_date && (
+                <div className={styles.featuredDate}>
+                  <span className={styles.dateDay}>{formatDate(events[1].start_date).day}</span>
+                  <span className={styles.dateMonth}>{formatDate(events[1].start_date).month}</span>
+                </div>
+              )}
+              <h3 className={styles.featuredTitle}>{events[1].title}</h3>
+              <p className={styles.featuredDescription}>
+                {events[1].description?.substring(0, 120) || events[1].location}
+              </p>
+            </div>
+          ) : (
+            <div className={styles.featuredCard}>
+              <h3 className={styles.featuredTitle}>Em Breve</h3>
+              <p className={styles.featuredDescription}>
+                Novos eventos serão anunciados
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Quadrante 4: Agenda (inferior direito) */}
+        <div className={styles.agendaBlock}>
+          <div className={styles.blockHeader}>
+            <span>📋</span> AGENDA
+            <button className={styles.viewAllBtn} onClick={() => navigate('/events')}>
+              Ver todos →
+            </button>
           </div>
-          <div className={styles.eventsScroll}>
-            {events.slice(1, 5).map((event, idx) => (
+          <div className={styles.blockEventsList}>
+            {events.slice(2, 6).map((event, idx) => (
               <div key={idx} className={styles.eventItem} onClick={() => navigate('/events')}>
                 {event.start_date && (
                   <div className={styles.eventDate}>
@@ -247,19 +340,6 @@ const HomeTomiPro: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Language Selector */}
-      <div className={styles.languageBar}>
-        {languages.map((lang) => (
-          <button
-            key={lang.code}
-            className={`${styles.langBtn} ${i18n.language === lang.code ? styles.active : ''}`}
-            onClick={() => i18n.changeLanguage(lang.code)}
-          >
-            {lang.flag}
-          </button>
-        ))}
-      </div>
 
       {/* Footer */}
       <footer className={styles.footer}>

@@ -2,7 +2,23 @@
 Totem Serializers
 """
 from rest_framework import serializers
-from .models import Totem, TotemSession
+from .models import Totem, TotemSession, ContentBlock
+
+
+class ContentBlockSerializer(serializers.ModelSerializer):
+    position_display = serializers.CharField(source='get_position_display', read_only=True)
+    block_type_display = serializers.CharField(source='get_block_type_display', read_only=True)
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = ContentBlock
+        fields = [
+            'id', 'totem', 'position', 'position_display', 'block_type', 'block_type_display',
+            'title', 'subtitle', 'background_color', 'text_color',
+            'image', 'content_html', 'link_url', 'config',
+            'is_active', 'order', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class TotemSerializer(serializers.ModelSerializer):

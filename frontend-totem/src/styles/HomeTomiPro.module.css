@@ -127,12 +127,47 @@
   color: #f1c40f;
 }
 
+.langButtonsHeader {
+  display: flex;
+  gap: 4px;
+  margin-left: 16px;
+  padding-left: 16px;
+  border-left: 1px solid #333;
+}
+
+.langBtnHeader {
+  width: 36px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: rgba(255,255,255,0.1);
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.langBtnHeader:hover {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+.langBtnHeader.active {
+  background: #f1c40f;
+  color: #000;
+  border-color: #f1c40f;
+}
+
 /* ==========================================
    BANNER SECTION
    ========================================== */
 .bannerSection {
   position: relative;
-  flex: 0 0 45%;
+  flex: 0 0 40%;
   background: #111;
   overflow: hidden;
 }
@@ -167,14 +202,19 @@
 .bannerCTA {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: #f1c40f;
   color: #000;
-  padding: 12px 32px;
+  padding: 14px 40px;
   border-radius: 30px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 18px;
   animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 4px 20px rgba(241, 196, 15, 0.4);
+}
+
+.ctaIcon {
+  font-size: 20px;
 }
 
 @keyframes pulse {
@@ -253,33 +293,40 @@
 }
 
 /* ==========================================
-   MENU BAR
+   MENU BAR - BOTÕES GRANDES
    ========================================== */
 .menuBar {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  padding: 16px 24px;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
   background: #f1c40f;
+  min-height: 120px;
 }
 
 .menuItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  background: rgba(0,0,0,0.1);
+  justify-content: center;
+  gap: 10px;
+  background: transparent;
   border: none;
-  padding: 16px 24px;
-  border-radius: 12px;
+  border-right: 1px solid rgba(0,0,0,0.1);
+  padding: 24px 40px;
   cursor: pointer;
   transition: all 0.2s;
-  min-width: 90px;
+  flex: 1;
+  max-width: 180px;
+}
+
+.menuItem:last-child {
+  border-right: none;
 }
 
 .menuItem:hover {
-  background: rgba(0,0,0,0.2);
-  transform: translateY(-2px);
+  background: rgba(0,0,0,0.1);
 }
 
 .menuItem:active {
@@ -287,11 +334,18 @@
 }
 
 .menuIcon {
-  font-size: 28px;
+  font-size: 48px;
+  line-height: 1;
+  filter: grayscale(100%) brightness(0);
+}
+
+.menuIconSvg {
+  width: 56px;
+  height: 56px;
 }
 
 .menuLabel {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   color: #000;
   text-transform: uppercase;
@@ -299,120 +353,149 @@
 }
 
 /* ==========================================
-   CONTENT AREA
+   CONTENT AREA - MOSAICO 2x2
    ========================================== */
 .contentArea {
   flex: 1;
-  display: flex;
-  gap: 16px;
-  padding: 16px 24px;
-  background: #f5f5f5;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  padding: 0;
+  background: #ddd;
   overflow: hidden;
 }
 
-.featuredSection {
-  flex: 1;
+/* Bloco de Eventos (lista) */
+.eventsBlock {
   display: flex;
   flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+}
+
+.blockHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: #f8f8f8;
+  border-bottom: 1px solid #eee;
+  font-weight: 700;
+  color: #333;
+  font-size: 16px;
+}
+
+.blockHeader span {
+  font-size: 20px;
+}
+
+.blockEventsList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+}
+
+/* Quadrante 2: Evento em Destaque (amarelo) */
+.featuredSection {
+  display: flex;
+  flex-direction: column;
+  background: #f1c40f;
+  padding: 24px;
+  overflow: hidden;
+}
+
+/* Quadrante 3: Evento em Destaque 2 (azul/roxo) */
+.featuredSection2 {
+  display: flex;
+  flex-direction: column;
+  background: #5b6abf;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.featuredSection2 .featuredCard {
+  color: #fff;
+}
+
+.featuredSection2 .dateDay,
+.featuredSection2 .dateMonth,
+.featuredSection2 .featuredTitle {
+  color: #fff;
+}
+
+.featuredSection2 .featuredDescription {
+  color: rgba(255,255,255,0.8);
+}
+
+/* Bloco de Agenda */
+.agendaBlock {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow: hidden;
 }
 
 .featuredCard {
   flex: 1;
   display: flex;
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  flex-direction: column;
   cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.featuredCard:hover {
-  transform: scale(1.02);
-}
-
-.featuredImage {
-  flex: 0 0 50%;
-  background: #ddd;
-}
-
-.featuredImage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.placeholderImage {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 64px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.featuredInfo {
-  flex: 1;
-  display: flex;
-  padding: 24px;
-  gap: 16px;
 }
 
 .featuredDate {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #f1c40f;
-  padding: 12px 16px;
-  border-radius: 12px;
-  min-width: 60px;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .dateDay {
-  font-size: 28px;
+  font-size: 56px;
   font-weight: 700;
   color: #000;
   line-height: 1;
 }
 
 .dateMonth {
-  font-size: 12px;
+  font-size: 24px;
   font-weight: 600;
   color: #000;
   text-transform: uppercase;
 }
 
-.featuredText {
+.featuredTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.featuredDescription {
+  font-size: 16px;
+  color: rgba(0,0,0,0.7);
+  line-height: 1.5;
   flex: 1;
 }
 
-.featuredText h3 {
-  margin: 0 0 12px 0;
-  font-size: 22px;
-  color: #222;
-  line-height: 1.3;
+.featuredImage {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  opacity: 0.2;
 }
 
-.featuredText p {
-  margin: 0;
-  color: #666;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-/* Events List */
-.eventsList {
-  flex: 0 0 320px;
+/* Quadrante 3: Agenda Header (inferior esquerdo) */
+.agendaSection {
   display: flex;
   flex-direction: column;
   background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-.eventsHeader {
+.agendaHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -421,35 +504,54 @@
   border-bottom: 1px solid #eee;
 }
 
-.eventsHeader span {
+.agendaTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 700;
   color: #333;
-  font-size: 14px;
+  font-size: 18px;
 }
 
-.eventsHeader button {
+.agendaTitle span {
+  font-size: 22px;
+}
+
+.viewAllBtn {
   background: none;
   border: none;
-  color: #f1c40f;
+  color: #5b6abf;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
 }
 
-.eventsScroll {
+/* Quadrante 4: Lista de Eventos (inferior direito) */
+.eventsList {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 12px;
+}
+
+.eventsListSection {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
 }
 
 .eventItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 16px;
+  padding: 16px;
   border-radius: 12px;
   cursor: pointer;
   transition: background 0.2s;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.eventItem:last-child {
+  border-bottom: none;
 }
 
 .eventItem:hover {
@@ -461,20 +563,20 @@
   flex-direction: column;
   align-items: center;
   background: #f1c40f;
-  padding: 8px 12px;
-  border-radius: 8px;
-  min-width: 50px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  min-width: 55px;
 }
 
 .eventDay {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 700;
   color: #000;
   line-height: 1;
 }
 
 .eventMonth {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: #000;
   text-transform: uppercase;
@@ -489,7 +591,7 @@
 }
 
 .eventTitle {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #222;
   white-space: nowrap;
@@ -498,7 +600,7 @@
 }
 
 .eventLocation {
-  font-size: 12px;
+  font-size: 14px;
   color: #888;
   white-space: nowrap;
   overflow: hidden;
@@ -506,48 +608,10 @@
 }
 
 .eventThumb {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
   object-fit: cover;
-}
-
-/* ==========================================
-   LANGUAGE BAR
-   ========================================== */
-.languageBar {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 100;
-}
-
-.langBtn {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.2);
-  background: rgba(0,0,0,0.6);
-  font-size: 24px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.langBtn:hover {
-  background: rgba(0,0,0,0.8);
-  border-color: #f1c40f;
-}
-
-.langBtn.active {
-  background: #f1c40f;
-  border-color: #f1c40f;
 }
 
 /* ==========================================
@@ -584,20 +648,27 @@
    ========================================== */
 @media (max-width: 1024px) {
   .contentArea {
-    flex-direction: column;
+    flex-wrap: wrap;
   }
 
-  .eventsList {
-    flex: 0 0 auto;
-    max-height: 200px;
+  .languageSection {
+    flex: 0 0 60px;
   }
 
-  .featuredCard {
-    flex-direction: column;
+  .featuredSection {
+    flex: 0 0 220px;
   }
 
-  .featuredImage {
-    flex: 0 0 200px;
+  .menuItem {
+    padding: 16px 20px;
+  }
+
+  .menuIcon {
+    font-size: 36px;
+  }
+
+  .menuLabel {
+    font-size: 11px;
   }
 }
 
@@ -606,16 +677,39 @@
     flex: 0 0 35%;
   }
 
+  .menuBar {
+    min-height: 80px;
+  }
+
   .menuItem {
     padding: 12px 16px;
-    min-width: 70px;
   }
 
   .menuIcon {
-    font-size: 24px;
+    font-size: 32px;
   }
 
   .menuLabel {
     font-size: 10px;
+  }
+
+  .contentArea {
+    flex-wrap: wrap;
+  }
+
+  .languageSection {
+    flex: 0 0 60px;
+    order: 1;
+  }
+
+  .featuredSection {
+    flex: 1 1 200px;
+    order: 2;
+  }
+
+  .agendaSection {
+    flex: 1 1 100%;
+    order: 3;
+    max-height: 300px;
   }
 }
