@@ -45,6 +45,7 @@ def identify_totem(request):
             'longitude': str(totem.longitude),
             'address': totem.address,
             # Branding fields
+            'theme': totem.theme or 'player',
             'logo': totem.logo.url if totem.logo else None,
             'background_image': totem.background_image.url if totem.background_image else None,
             'background_color': totem.background_color or '',

@@ -34,6 +34,17 @@ class Totem(models.Model):
     session_timeout = models.IntegerField('Timeout (segundos)', default=60)
 
     # Customization / Branding
+    THEME_CHOICES = [
+        ('player', 'Player (Somente Anúncios)'),
+        ('tomipro', 'TOMI Pro (Completo)'),
+        ('tomi', 'TOMI (Clássico)'),
+        ('dashboard', 'Dashboard'),
+        ('touch', 'Touch'),
+        ('simple', 'Simples'),
+    ]
+
+    theme = models.CharField('Layout/Tema', max_length=20, choices=THEME_CHOICES, default='player',
+                             help_text='Layout visual do totem')
     logo = models.ImageField('Logo', upload_to='totems/logos/', null=True, blank=True,
                              help_text='Logo PNG para exibir no cabeçalho (substitui o nome da cidade)')
     background_image = models.ImageField('Imagem de Fundo', upload_to='totems/backgrounds/', null=True, blank=True,

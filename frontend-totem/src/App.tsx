@@ -13,14 +13,20 @@ import News from './pages/News';
 import POIs from './pages/POIs';
 import Layout from './components/Layout';
 import Selfie from './pages/Selfie';
+import HomeTomiPro from './pages/HomeTomiPro';
 
 const HomeSelector: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const theme = searchParams.get('theme');
+  const { totem } = useTotemStore();
+
+  // URL param takes priority, then totem config, then default to player
+  const urlTheme = searchParams.get('theme');
+  const theme = urlTheme || totem?.theme || 'player';
 
   if (theme === 'dashboard') return <HomeDashboard />;
   if (theme === 'touch') return <HomeTouch />;
   if (theme === 'tomi') return <HomeTomi />;
+  if (theme === 'tomipro') return <HomeTomiPro />;
   if (theme === 'simple') return <Home />;
   if (theme === 'player') return <Player />;
 

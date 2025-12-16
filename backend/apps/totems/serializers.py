@@ -16,7 +16,7 @@ class TotemSerializer(serializers.ModelSerializer):
             'id', 'city', 'city_name', 'name', 'identifier',
             'address', 'neighborhood', 'latitude', 'longitude',
             'screen_orientation', 'brightness', 'volume', 'session_timeout',
-            'logo', 'background_image', 'background_color',
+            'theme', 'logo', 'background_image', 'background_color',
             'status', 'last_heartbeat', 'last_ip',
             'installed_at', 'created_at', 'updated_at'
         ]
@@ -34,7 +34,7 @@ class TotemPublicSerializer(serializers.ModelSerializer):
             'id', 'name', 'identifier', 'city', 'city_name', 'city_slug',
             'address', 'neighborhood', 'latitude', 'longitude',
             'screen_orientation', 'brightness', 'volume', 'session_timeout',
-            'logo', 'background_image', 'background_color'
+            'theme', 'logo', 'background_image', 'background_color'
         ]
 
 

@@ -8,10 +8,20 @@ interface Totem {
   address: string;
   city_name: string;
   status: string;
+  theme: string;
   logo: string | null;
   background_image: string | null;
   background_color: string;
 }
+
+const THEME_OPTIONS = [
+  { value: 'player', label: 'Player (Somente Anuncios)', icon: '📺' },
+  { value: 'tomipro', label: 'TOMI Pro (Completo)', icon: '⭐' },
+  { value: 'tomi', label: 'TOMI (Classico)', icon: '🖥️' },
+  { value: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { value: 'touch', label: 'Touch', icon: '👆' },
+  { value: 'simple', label: 'Simples', icon: '📱' },
+];
 
 const API_BASE = 'http://10.50.30.168:8000';
 
@@ -23,6 +33,7 @@ const TotemsAdmin: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   // Form state
+  const [selectedTheme, setSelectedTheme] = useState('player');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bgFile, setBgFile] = useState<File | null>(null);
@@ -51,6 +62,7 @@ const TotemsAdmin: React.FC = () => {
 
   const handleEdit = (totem: Totem) => {
     setEditingTotem(totem);
+    setSelectedTheme(totem.theme || 'player');
     setLogoFile(null);
     setBgFile(null);
     setLogoPreview(totem.logo ? (totem.logo.startsWith('http') ? totem.logo : `${API_BASE}${totem.logo}`) : null);
@@ -100,6 +112,9 @@ const TotemsAdmin: React.FC = () => {
     setSaving(true);
     try {
       const formData = new FormData();
+
+      // Add theme
+      formData.append('theme', selectedTheme);
 
       // Add logo if changed
       if (logoFile) {
@@ -152,69 +167,54 @@ const TotemsAdmin: React.FC = () => {
             <tr>
               <th>Nome</th>
               <th>Cidade</th>
-              <th>Localizacao</th>
+              <th>Layout</th>
               <th>Logo</th>
-              <th>Fundo</th>
               <th>Status</th>
               <th>Acoes</th>
             </tr>
           </thead>
           <tbody>
-            {totems.map(totem => (
-              <tr key={totem.id}>
-                <td><strong>{totem.name}</strong></td>
-                <td>{totem.city_name}</td>
-                <td>{totem.address || '-'}</td>
-                <td>
-                  {totem.logo ? (
-                    <img
-                      src={getImageUrl(totem.logo) || ''}
-                      alt="Logo"
-                      style={{ height: '30px', maxWidth: '80px', objectFit: 'contain' }}
-                    />
-                  ) : (
-                    <span style={{ color: '#666' }}>Sem logo</span>
-                  )}
-                </td>
-                <td>
-                  {totem.background_image ? (
-                    <img
-                      src={getImageUrl(totem.background_image) || ''}
-                      alt="Fundo"
-                      style={{ height: '30px', width: '50px', objectFit: 'cover', borderRadius: '4px' }}
-                    />
-                  ) : totem.background_color ? (
-                    <div
-                      style={{
-                        height: '30px',
-                        width: '50px',
-                        background: totem.background_color,
-                        borderRadius: '4px',
-                        border: '1px solid #333'
-                      }}
-                      title={totem.background_color}
-                    />
-                  ) : (
-                    <span style={{ color: '#666' }}>Padrao</span>
-                  )}
-                </td>
-                <td>
-                  <span className={`${styles.badge} ${totem.status === 'active' ? styles.badgeGreen : styles.badgeRed}`}>
-                    {totem.status === 'active' ? 'Ativo' : 'Inativo'}
-                  </span>
-                </td>
-                <td>
-                  <div className={styles.actions}>
-                    <button className={styles.editBtn} onClick={() => handleEdit(totem)}>
-                      Personalizar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {totems.map(totem => {
+              const themeInfo = THEME_OPTIONS.find(t => t.value === totem.theme) || THEME_OPTIONS[0];
+              return (
+                <tr key={totem.id}>
+                  <td><strong>{totem.name}</strong></td>
+                  <td>{totem.city_name}</td>
+                  <td>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>{themeInfo.icon}</span>
+                      <span>{themeInfo.label}</span>
+                    </span>
+                  </td>
+                  <td>
+                    {totem.logo ? (
+                      <img
+                        src={getImageUrl(totem.logo) || ''}
+                        alt="Logo"
+                        style={{ height: '30px', maxWidth: '80px', objectFit: 'contain' }}
+                      />
+                    ) : (
+                      <span style={{ color: '#666' }}>Sem logo</span>
+                    )}
+                  </td>
+                  <td>
+                    <span className={`${styles.badge} ${totem.status === 'active' ? styles.badgeGreen : styles.badgeRed}`}>
+                      {totem.status === 'active' ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.actions}>
+                      <button className={styles.editBtn} onClick={() => handleEdit(totem)}>
+                        Personalizar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
             {totems.length === 0 && (
               <tr>
-                <td colSpan={7} className={styles.emptyRow}>Nenhum totem encontrado</td>
+                <td colSpan={6} className={styles.emptyRow}>Nenhum totem encontrado</td>
               </tr>
             )}
           </tbody>
@@ -230,6 +230,39 @@ const TotemsAdmin: React.FC = () => {
               <button className={styles.closeBtn} onClick={() => setShowModal(false)}>x</button>
             </div>
             <form onSubmit={handleSubmit}>
+              {/* Theme Selector */}
+              <div className={styles.formGroup}>
+                <label>Layout / Tema</label>
+                <p style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}>
+                  Escolha o layout visual do totem.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                  {THEME_OPTIONS.map(theme => (
+                    <button
+                      key={theme.value}
+                      type="button"
+                      onClick={() => setSelectedTheme(theme.value)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '12px 16px',
+                        background: selectedTheme === theme.value ? '#f1c40f' : 'rgba(255,255,255,0.05)',
+                        border: selectedTheme === theme.value ? '2px solid #f1c40f' : '2px solid rgba(255,255,255,0.1)',
+                        borderRadius: '8px',
+                        color: selectedTheme === theme.value ? '#000' : '#fff',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <span style={{ fontSize: '24px' }}>{theme.icon}</span>
+                      <span style={{ fontWeight: selectedTheme === theme.value ? 600 : 400 }}>{theme.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Logo */}
               <div className={styles.formGroup}>
                 <label>Logo (PNG recomendado)</label>

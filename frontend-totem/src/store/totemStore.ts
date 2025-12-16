@@ -9,7 +9,8 @@ interface TotemInfo {
   latitude: string;
   longitude: string;
   address: string;
-  // Branding
+  // Branding/Theme
+  theme: string;
   logo: string | null;
   background_image: string | null;
   background_color: string;
