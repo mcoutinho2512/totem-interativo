@@ -13,6 +13,7 @@ interface ContentBlock {
   background_color: string;
   text_color: string;
   image: string | null;
+  video: string | null;
   content_html: string;
   link_url: string;
   config: any;
@@ -64,6 +65,12 @@ const ContentBlocksAdmin: React.FC = () => {
   const [editingBlock, setEditingBlock] = useState<ContentBlock | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [draggedBlock, setDraggedBlock] = useState<number | null>(null);
+
+  // File upload state
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -129,7 +136,19 @@ const ContentBlocksAdmin: React.FC = () => {
       link_url: '',
       is_active: true,
     });
+    // Reset file states
+    setImageFile(null);
+    setVideoFile(null);
+    setImagePreview(null);
+    setVideoPreview(null);
     setShowModal(true);
+  };
+
+  const API_BASE = 'http://10.50.30.168:8000';
+
+  const getMediaUrl = (url: string | null) => {
+    if (!url) return null;
+    return url.startsWith('http') ? url : `${API_BASE}${url}`;
   };
 
   const handleEditBlock = (block: ContentBlock) => {
@@ -145,6 +164,11 @@ const ContentBlocksAdmin: React.FC = () => {
       link_url: block.link_url,
       is_active: block.is_active,
     });
+    // Set previews for existing media
+    setImageFile(null);
+    setVideoFile(null);
+    setImagePreview(getMediaUrl(block.image));
+    setVideoPreview(getMediaUrl(block.video));
     setShowModal(true);
   };
 
@@ -176,6 +200,16 @@ const ContentBlocksAdmin: React.FC = () => {
       data.append('content_html', formData.content_html);
       data.append('link_url', formData.link_url);
       data.append('is_active', formData.is_active.toString());
+
+      // Append image file if selected
+      if (imageFile) {
+        data.append('image', imageFile);
+      }
+
+      // Append video file if selected
+      if (videoFile) {
+        data.append('video', videoFile);
+      }
 
       if (editingBlock) {
         await contentBlocksService.updateBlock(editingBlock.id, data);
@@ -550,6 +584,135 @@ const ContentBlocksAdmin: React.FC = () => {
                   placeholder="Ex: Confira a programacao"
                 />
               </div>
+
+              {/* Upload de Imagem (para tipo image) */}
+              {formData.block_type === 'image' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
+                    Imagem
+                  </label>
+                  <p style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                    Formatos aceitos: JPG, PNG, GIF. Tamanho recomendado: 800x600px.
+                  </p>
+                  {imagePreview && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        style={{
+                          maxWidth: '200px',
+                          maxHeight: '150px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '1px solid #ddd',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageFile(null);
+                          setImagePreview(null);
+                        }}
+                        style={{
+                          marginLeft: '12px',
+                          padding: '4px 12px',
+                          background: '#e74c3c',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                        }}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setImageFile(file);
+                        setImagePreview(URL.createObjectURL(file));
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Upload de Video (para tipo video) */}
+              {formData.block_type === 'video' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
+                    Video (MP4 recomendado)
+                  </label>
+                  <p style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                    O video sera reproduzido em loop automaticamente no totem. Tamanho maximo recomendado: 50MB.
+                  </p>
+                  {videoPreview && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <video
+                        src={videoPreview}
+                        style={{
+                          maxWidth: '300px',
+                          maxHeight: '200px',
+                          borderRadius: '8px',
+                          border: '1px solid #ddd',
+                        }}
+                        controls
+                        muted
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVideoFile(null);
+                          setVideoPreview(null);
+                        }}
+                        style={{
+                          marginLeft: '12px',
+                          padding: '4px 12px',
+                          background: '#e74c3c',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          verticalAlign: 'top',
+                        }}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/ogg"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setVideoFile(file);
+                        setVideoPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Cores */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

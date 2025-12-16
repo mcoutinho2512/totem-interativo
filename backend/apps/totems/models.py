@@ -124,6 +124,8 @@ class ContentBlock(models.Model):
 
     # Content
     image = models.ImageField('Imagem', upload_to='totems/blocks/', null=True, blank=True)
+    video = models.FileField('Vídeo', upload_to='totems/blocks/videos/', null=True, blank=True,
+                             help_text='Arquivo de vídeo para blocos do tipo "video" (MP4 recomendado)')
     content_html = models.TextField('Conteúdo HTML', blank=True, default='',
                                     help_text='HTML personalizado para blocos do tipo "custom"')
     link_url = models.URLField('Link', blank=True, default='')

@@ -240,6 +240,26 @@ const HomeTomiPro: React.FC = () => {
           </div>
         );
 
+      case 'video':
+        return (
+          <div
+            className={styles.featuredSection}
+            style={{ ...blockStyle, padding: 0, overflow: 'hidden' }}
+            onClick={() => block.link_url && navigate(block.link_url)}
+          >
+            {block.video && (
+              <video
+                src={block.video.startsWith('http') ? block.video : `http://10.50.30.168:8000${block.video}`}
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            )}
+          </div>
+        );
+
       case 'news':
         return (
           <div className={styles.eventsBlock} style={blockStyle}>
@@ -450,7 +470,21 @@ const HomeTomiPro: React.FC = () => {
       {/* Main Banner / Ad Area */}
       <section className={styles.bannerSection}>
         {currentAdData ? (
-          <div className={styles.bannerContent}>
+          <div
+            className={styles.bannerContent}
+            onClick={() => {
+              if (currentAdData.link_url) {
+                if (currentAdData.link_url.startsWith('http')) {
+                  window.open(currentAdData.link_url, '_blank');
+                } else {
+                  navigate(currentAdData.link_url);
+                }
+              } else {
+                navigate('/pois');
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
             <img
               src={currentAdData.file?.startsWith('http') ? currentAdData.file : `http://10.50.30.168:8000${currentAdData.file}`}
               alt=""
