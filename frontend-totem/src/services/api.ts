@@ -108,4 +108,8 @@ export const advertisingService = {
     api.post('/advertising/active/', { creative_id: creativeId, totem_id: totemId, view_duration: duration }),
 };
 
+export const contentBlocksService = {
+  getBlocks: (totemId: number) => api.get(`/totems/blocks/?totem=${totemId}`),
+};
+
 export default api;

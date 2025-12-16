@@ -23,6 +23,7 @@ import NewsAdmin from './pages/admin/NewsAdmin';
 import POIsAdmin from './pages/admin/POIsAdmin';
 import GalleryAdmin from './pages/admin/GalleryAdmin';
 import TotemsAdmin from './pages/admin/TotemsAdmin';
+import ContentBlocksAdmin from './pages/admin/ContentBlocksAdmin';
 import SettingsAdmin from './pages/admin/SettingsAdmin';
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
         <Route path="/admin/pois" element={<AdminLayout><POIsAdmin /></AdminLayout>} />
         <Route path="/admin/gallery" element={<AdminLayout><GalleryAdmin /></AdminLayout>} />
         <Route path="/admin/totems" element={<AdminLayout><TotemsAdmin /></AdminLayout>} />
+        <Route path="/admin/blocks" element={<AdminLayout><ContentBlocksAdmin /></AdminLayout>} />
         <Route path="/admin/settings" element={<AdminLayout><SettingsAdmin /></AdminLayout>} />
       </Routes>
     </BrowserRouter>

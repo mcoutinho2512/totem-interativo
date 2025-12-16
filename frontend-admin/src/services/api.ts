@@ -257,4 +257,36 @@ export const totemsService = {
     api.patch(`/totems/${id}/`, data),
 };
 
+// Content Blocks Service
+export const contentBlocksService = {
+  getBlocks: (totemId?: number) =>
+    api.get(`/totems/blocks/${totemId ? `?totem=${totemId}` : ''}`),
+
+  getBlock: (id: number) =>
+    api.get(`/totems/blocks/${id}/`),
+
+  createBlock: (data: FormData) =>
+    api.post('/totems/blocks/', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  updateBlock: (id: number, data: FormData) =>
+    api.patch(`/totems/blocks/${id}/`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  updateBlockJson: (id: number, data: any) =>
+    api.patch(`/totems/blocks/${id}/`, data),
+
+  deleteBlock: (id: number) =>
+    api.delete(`/totems/blocks/${id}/`),
+
+  reorderBlocks: (totemId: number, positions: { id: number; position: number }[]) =>
+    Promise.all(
+      positions.map((p) =>
+        api.patch(`/totems/blocks/${p.id}/`, { position: p.position })
+      )
+    ),
+};
+
 export default api;

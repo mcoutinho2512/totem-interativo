@@ -24,6 +24,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { path: '/admin/gallery', icon: '🖼️', label: 'Galeria' },
     { divider: true, label: 'Sistema' },
     { path: '/admin/totems', icon: '🖥️', label: 'Totems' },
+    { path: '/admin/blocks', icon: '🧩', label: 'Blocos de Conteúdo' },
     { path: '/admin/settings', icon: '⚙️', label: 'Configurações' },
   ];
 

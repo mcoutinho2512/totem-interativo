@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTotemStore } from '../store/totemStore';
-import { weatherService, contentService, advertisingService } from '../services/api';
+import { weatherService, contentService, advertisingService, contentBlocksService } from '../services/api';
 import styles from '../styles/HomeTomiPro.module.css';
 
 // SVG Icons para menu (mais nítidos que emojis)
@@ -52,6 +52,7 @@ const HomeTomiPro: React.FC = () => {
   const [ads, setAds] = useState<any[]>([]);
   const [currentAd, setCurrentAd] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [contentBlocks, setContentBlocks] = useState<any[]>([]);
 
   const menuItems = [
     { icon: <MapIcon />, label: 'MAPA', path: '/navigation' },
@@ -87,6 +88,16 @@ const HomeTomiPro: React.FC = () => {
     advertisingService.getActiveAds(totem?.id || 1)
       .then(res => setAds(res.data || []))
       .catch(() => {});
+
+    // Load content blocks for this totem
+    if (totem?.id) {
+      contentBlocksService.getBlocks(totem.id)
+        .then(res => {
+          const blocks = res.data?.results || res.data || [];
+          setContentBlocks(Array.isArray(blocks) ? blocks : []);
+        })
+        .catch(() => {});
+    }
   }, [totem]);
 
   // Rotacao de anuncios
@@ -116,6 +127,269 @@ const HomeTomiPro: React.FC = () => {
 
   const currentAdData = ads[currentAd];
   const featuredEvent = events[0];
+
+  // Get block by position (1-4)
+  const getBlockByPosition = (position: number) => {
+    return contentBlocks.find(b => b.position === position && b.is_active);
+  };
+
+  // Render block content based on type
+  const renderBlockContent = (position: number) => {
+    const block = getBlockByPosition(position);
+
+    // Default blocks if no custom block is configured
+    if (!block) {
+      return renderDefaultBlock(position);
+    }
+
+    const blockStyle = {
+      background: block.background_color || '#ffffff',
+      color: block.text_color || '#000000',
+    };
+
+    switch (block.block_type) {
+      case 'events_list':
+        return (
+          <div className={styles.eventsBlock} style={blockStyle}>
+            <div className={styles.blockHeader}>
+              <span>📅</span> {block.title || 'PRÓXIMOS EVENTOS'}
+            </div>
+            <div className={styles.blockEventsList}>
+              {events.slice(0, 4).map((event, idx) => (
+                <div key={idx} className={styles.eventItem} onClick={() => navigate('/events')}>
+                  {event.start_date && (
+                    <div className={styles.eventDate}>
+                      <span className={styles.eventDay}>{formatDate(event.start_date).day}</span>
+                      <span className={styles.eventMonth}>{formatDate(event.start_date).month}</span>
+                    </div>
+                  )}
+                  <div className={styles.eventInfo}>
+                    <span className={styles.eventTitle}>{event.title}</span>
+                    <span className={styles.eventLocation}>{event.location}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'featured_event':
+        const eventIndex = block.config?.event_index || 0;
+        const event = events[eventIndex];
+        return (
+          <div
+            className={styles.featuredSection}
+            style={blockStyle}
+            onClick={() => navigate('/events')}
+          >
+            {event ? (
+              <div className={styles.featuredCard}>
+                {event.start_date && (
+                  <div className={styles.featuredDate}>
+                    <span className={styles.dateDay}>{formatDate(event.start_date).day}</span>
+                    <span className={styles.dateMonth}>{formatDate(event.start_date).month}</span>
+                  </div>
+                )}
+                <h3 className={styles.featuredTitle}>{event.title}</h3>
+                <p className={styles.featuredDescription}>
+                  {event.description?.substring(0, 150) || event.location}
+                </p>
+              </div>
+            ) : (
+              <div className={styles.featuredCard}>
+                <h3 className={styles.featuredTitle}>{block.title || 'Eventos'}</h3>
+                <p className={styles.featuredDescription}>
+                  {block.subtitle || 'Confira os eventos da cidade'}
+                </p>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'custom':
+        return (
+          <div
+            className={styles.featuredSection}
+            style={blockStyle}
+            onClick={() => block.link_url && navigate(block.link_url)}
+          >
+            <div className={styles.featuredCard}>
+              <h3 className={styles.featuredTitle}>{block.title}</h3>
+              <p className={styles.featuredDescription}>{block.subtitle}</p>
+              {block.content_html && (
+                <div dangerouslySetInnerHTML={{ __html: block.content_html }} />
+              )}
+            </div>
+          </div>
+        );
+
+      case 'image':
+        return (
+          <div
+            className={styles.featuredSection}
+            style={{ ...blockStyle, padding: 0, overflow: 'hidden' }}
+            onClick={() => block.link_url && navigate(block.link_url)}
+          >
+            {block.image && (
+              <img
+                src={block.image.startsWith('http') ? block.image : `http://10.50.30.168:8000${block.image}`}
+                alt={block.title}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            )}
+          </div>
+        );
+
+      case 'news':
+        return (
+          <div className={styles.eventsBlock} style={blockStyle}>
+            <div className={styles.blockHeader}>
+              <span>📰</span> {block.title || 'NOTÍCIAS'}
+            </div>
+            <div className={styles.blockEventsList}>
+              <div className={styles.featuredCard} onClick={() => navigate('/news')}>
+                <p className={styles.featuredDescription}>
+                  {block.subtitle || 'Confira as últimas notícias'}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'pois':
+        return (
+          <div className={styles.eventsBlock} style={blockStyle}>
+            <div className={styles.blockHeader}>
+              <span>📍</span> {block.title || 'PONTOS DE INTERESSE'}
+            </div>
+            <div className={styles.blockEventsList}>
+              <div className={styles.featuredCard} onClick={() => navigate('/pois')}>
+                <p className={styles.featuredDescription}>
+                  {block.subtitle || 'Descubra os pontos turísticos'}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return renderDefaultBlock(position);
+    }
+  };
+
+  // Default blocks when no custom configuration exists
+  const renderDefaultBlock = (position: number) => {
+    switch (position) {
+      case 1: // Superior Esquerdo - Lista de Eventos
+        return (
+          <div className={styles.eventsBlock}>
+            <div className={styles.blockHeader}>
+              <span>📅</span> PRÓXIMOS EVENTOS
+            </div>
+            <div className={styles.blockEventsList}>
+              {events.slice(0, 4).map((event, idx) => (
+                <div key={idx} className={styles.eventItem} onClick={() => navigate('/events')}>
+                  {event.start_date && (
+                    <div className={styles.eventDate}>
+                      <span className={styles.eventDay}>{formatDate(event.start_date).day}</span>
+                      <span className={styles.eventMonth}>{formatDate(event.start_date).month}</span>
+                    </div>
+                  )}
+                  <div className={styles.eventInfo}>
+                    <span className={styles.eventTitle}>{event.title}</span>
+                    <span className={styles.eventLocation}>{event.location}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 2: // Superior Direito - Evento em Destaque (amarelo)
+        return (
+          <div className={styles.featuredSection}>
+            {featuredEvent ? (
+              <div className={styles.featuredCard} onClick={() => navigate('/events')}>
+                {featuredEvent.start_date && (
+                  <div className={styles.featuredDate}>
+                    <span className={styles.dateDay}>{formatDate(featuredEvent.start_date).day}</span>
+                    <span className={styles.dateMonth}>{formatDate(featuredEvent.start_date).month}</span>
+                  </div>
+                )}
+                <h3 className={styles.featuredTitle}>{featuredEvent.title}</h3>
+                <p className={styles.featuredDescription}>
+                  {featuredEvent.description?.substring(0, 150) || featuredEvent.location}
+                </p>
+              </div>
+            ) : (
+              <div className={styles.featuredCard}>
+                <h3 className={styles.featuredTitle}>Eventos</h3>
+                <p className={styles.featuredDescription}>
+                  Confira os eventos da cidade
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      case 3: // Inferior Esquerdo - Evento em Destaque 2 (azul/roxo)
+        return (
+          <div className={styles.featuredSection2}>
+            {events[1] ? (
+              <div className={styles.featuredCard} onClick={() => navigate('/events')}>
+                {events[1].start_date && (
+                  <div className={styles.featuredDate}>
+                    <span className={styles.dateDay}>{formatDate(events[1].start_date).day}</span>
+                    <span className={styles.dateMonth}>{formatDate(events[1].start_date).month}</span>
+                  </div>
+                )}
+                <h3 className={styles.featuredTitle}>{events[1].title}</h3>
+                <p className={styles.featuredDescription}>
+                  {events[1].description?.substring(0, 120) || events[1].location}
+                </p>
+              </div>
+            ) : (
+              <div className={styles.featuredCard}>
+                <h3 className={styles.featuredTitle}>Em Breve</h3>
+                <p className={styles.featuredDescription}>
+                  Novos eventos serão anunciados
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      case 4: // Inferior Direito - Agenda
+        return (
+          <div className={styles.agendaBlock}>
+            <div className={styles.blockHeader}>
+              <span>📋</span> AGENDA
+              <button className={styles.viewAllBtn} onClick={() => navigate('/events')}>
+                Ver todos →
+              </button>
+            </div>
+            <div className={styles.blockEventsList}>
+              {events.slice(2, 6).map((event, idx) => (
+                <div key={idx} className={styles.eventItem} onClick={() => navigate('/events')}>
+                  {event.start_date && (
+                    <div className={styles.eventDate}>
+                      <span className={styles.eventDay}>{formatDate(event.start_date).day}</span>
+                      <span className={styles.eventMonth}>{formatDate(event.start_date).month}</span>
+                    </div>
+                  )}
+                  <div className={styles.eventInfo}>
+                    <span className={styles.eventTitle}>{event.title}</span>
+                    <span className={styles.eventLocation}>{event.location}</span>
+                  </div>
+                  {event.image && (
+                    <img src={event.image} alt="" className={styles.eventThumb} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -238,107 +512,12 @@ const HomeTomiPro: React.FC = () => {
 
       {/* Content Area - Mosaico 2x2 */}
       <section className={styles.contentArea}>
-        {/* Quadrante 1: Lista de Eventos (superior esquerdo) */}
-        <div className={styles.eventsBlock}>
-          <div className={styles.blockHeader}>
-            <span>📅</span> PRÓXIMOS EVENTOS
-          </div>
-          <div className={styles.blockEventsList}>
-            {events.slice(0, 4).map((event, idx) => (
-              <div key={idx} className={styles.eventItem} onClick={() => navigate('/events')}>
-                {event.start_date && (
-                  <div className={styles.eventDate}>
-                    <span className={styles.eventDay}>{formatDate(event.start_date).day}</span>
-                    <span className={styles.eventMonth}>{formatDate(event.start_date).month}</span>
-                  </div>
-                )}
-                <div className={styles.eventInfo}>
-                  <span className={styles.eventTitle}>{event.title}</span>
-                  <span className={styles.eventLocation}>{event.location}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quadrante 2: Evento em Destaque (superior direito) */}
-        <div className={styles.featuredSection}>
-          {featuredEvent ? (
-            <div className={styles.featuredCard} onClick={() => navigate('/events')}>
-              {featuredEvent.start_date && (
-                <div className={styles.featuredDate}>
-                  <span className={styles.dateDay}>{formatDate(featuredEvent.start_date).day}</span>
-                  <span className={styles.dateMonth}>{formatDate(featuredEvent.start_date).month}</span>
-                </div>
-              )}
-              <h3 className={styles.featuredTitle}>{featuredEvent.title}</h3>
-              <p className={styles.featuredDescription}>
-                {featuredEvent.description?.substring(0, 150) || featuredEvent.location}
-              </p>
-            </div>
-          ) : (
-            <div className={styles.featuredCard}>
-              <h3 className={styles.featuredTitle}>Eventos</h3>
-              <p className={styles.featuredDescription}>
-                Confira os eventos da cidade
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Quadrante 3: Evento em Destaque 2 (inferior esquerdo) */}
-        <div className={styles.featuredSection2}>
-          {events[1] ? (
-            <div className={styles.featuredCard} onClick={() => navigate('/events')}>
-              {events[1].start_date && (
-                <div className={styles.featuredDate}>
-                  <span className={styles.dateDay}>{formatDate(events[1].start_date).day}</span>
-                  <span className={styles.dateMonth}>{formatDate(events[1].start_date).month}</span>
-                </div>
-              )}
-              <h3 className={styles.featuredTitle}>{events[1].title}</h3>
-              <p className={styles.featuredDescription}>
-                {events[1].description?.substring(0, 120) || events[1].location}
-              </p>
-            </div>
-          ) : (
-            <div className={styles.featuredCard}>
-              <h3 className={styles.featuredTitle}>Em Breve</h3>
-              <p className={styles.featuredDescription}>
-                Novos eventos serão anunciados
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Quadrante 4: Agenda (inferior direito) */}
-        <div className={styles.agendaBlock}>
-          <div className={styles.blockHeader}>
-            <span>📋</span> AGENDA
-            <button className={styles.viewAllBtn} onClick={() => navigate('/events')}>
-              Ver todos →
-            </button>
-          </div>
-          <div className={styles.blockEventsList}>
-            {events.slice(2, 6).map((event, idx) => (
-              <div key={idx} className={styles.eventItem} onClick={() => navigate('/events')}>
-                {event.start_date && (
-                  <div className={styles.eventDate}>
-                    <span className={styles.eventDay}>{formatDate(event.start_date).day}</span>
-                    <span className={styles.eventMonth}>{formatDate(event.start_date).month}</span>
-                  </div>
-                )}
-                <div className={styles.eventInfo}>
-                  <span className={styles.eventTitle}>{event.title}</span>
-                  <span className={styles.eventLocation}>{event.location}</span>
-                </div>
-                {event.image && (
-                  <img src={event.image} alt="" className={styles.eventThumb} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Renderiza os 4 quadrantes dinamicamente */}
+        {[1, 2, 3, 4].map((position) => (
+          <React.Fragment key={position}>
+            {renderBlockContent(position)}
+          </React.Fragment>
+        ))}
       </section>
 
       {/* Footer */}

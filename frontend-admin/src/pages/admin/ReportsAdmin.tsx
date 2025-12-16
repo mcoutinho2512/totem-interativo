@@ -44,19 +44,21 @@ const ReportsAdmin: React.FC = () => {
       ]);
 
       const stats = statsRes.data;
-      const daily = dailyRes.data || [];
+      // Handle nested data structure from API
+      const daily = dailyRes.data?.data || dailyRes.data || [];
 
-      setDailyStats(daily);
-      setCampaigns(stats?.top_campaigns || []);
+      const dailyArray = Array.isArray(daily) ? daily : [];
+      setDailyStats(dailyArray);
+      setCampaigns(stats?.impressions_by_campaign || stats?.top_campaigns || []);
 
       // Calculate totals
-      const totalImpressions = daily.reduce((sum: number, d: DailyStats) => sum + d.impressions, 0);
-      const totalDuration = daily.reduce((sum: number, d: DailyStats) => sum + d.total_duration, 0);
+      const totalImpressions = dailyArray.reduce((sum: number, d: DailyStats) => sum + (d.impressions || 0), 0);
+      const totalDuration = dailyArray.reduce((sum: number, d: DailyStats) => sum + (d.total_duration || 0), 0);
 
       setTotals({
         impressions: totalImpressions,
         duration: totalDuration,
-        avgPerDay: daily.length > 0 ? Math.round(totalImpressions / daily.length) : 0
+        avgPerDay: dailyArray.length > 0 ? Math.round(totalImpressions / dailyArray.length) : 0
       });
     } catch (error) {
       console.error('Error loading reports:', error);
